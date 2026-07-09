@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     currentLng: 78.324208,
     speed: 0,
     timeElapsed: 0,
-    activeRoute: null
+    activeRoute: null,
+    isOnline: navigator.onLine,
+    offlineQueue: JSON.parse(localStorage.getItem('shakthi_telemetry_queue') || '[]')
   };
 
   // Initialize Modules
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAudioVault();
   initTelemetryLog();
   initContactsEditor();
+  initConnectivityMonitor();
 });
 
 /* ==========================================================================
@@ -65,6 +68,10 @@ function initSOS() {
   const deactivateSosBtn = document.getElementById('deactivate-sos');
   const statusIndicator = document.querySelector('.status-indicator');
   const statusText = document.querySelector('.status-text');
+
+  // Emergency overlay specific buttons
+  const emergencyToggleSiren = document.getElementById('emergency-toggle-siren');
+  const emergencyCallGuardian = document.getElementById('emergency-call-guardian');
 
   let countdownInterval = null;
   let countdownCount = 3;
@@ -121,6 +128,12 @@ function initSOS() {
       toggleSirenAlarm(true);
     }
 
+    // Update Guardian number link dynamically on launch
+    const guardianPhone = document.getElementById('contact-p-phone').textContent.trim();
+    if (emergencyCallGuardian && guardianPhone) {
+      emergencyCallGuardian.setAttribute('href', `tel:${guardianPhone.replace(/\s+/g, '')}`);
+    }
+
     // Append to telemetry logs
     logTelemetryEntry("CRITICAL", "SOS BROADCAST ACTIVE", "0 km/h", "ALERT");
 
@@ -157,6 +170,13 @@ function initSOS() {
   sosTrigger.addEventListener('click', triggerSOSCountdown);
   cancelSosBtn.addEventListener('click', cancelSOS);
   deactivateSosBtn.addEventListener('click', deactivateEmergency);
+
+  // Hook up emergency screen toggle siren button
+  if (emergencyToggleSiren) {
+    emergencyToggleSiren.addEventListener('click', () => {
+      toggleSirenAlarm(!window.appState.sirenActive);
+    });
+  }
 }
 
 /* ==========================================================================
@@ -181,24 +201,55 @@ function toggleSirenAlarm(activate) {
   const toggleSirenBtn = document.getElementById('toggle-siren');
   const sirenWidget = document.getElementById('widget-siren');
   const sirenStatus = document.getElementById('siren-status-text');
-  const sirenIcon = sirenWidget.querySelector('.action-icon');
+  const sirenIcon = sirenWidget ? sirenWidget.querySelector('.action-icon') : null;
+
+  // Emergency overlay elements
+  const emergencySirenBtn = document.getElementById('emergency-toggle-siren');
+  const emergencySirenStatus = document.getElementById('emergency-siren-status');
+  const emergencySirenDesc = document.getElementById('emergency-siren-desc');
 
   if (activate) {
     window.appState.sirenActive = true;
-    toggleSirenBtn.classList.add('active');
-    sirenIcon.classList.add('active');
-    sirenStatus.textContent = "ACTIVE (Loud)";
-    sirenStatus.style.color = "var(--color-crimson)";
+    if (toggleSirenBtn) toggleSirenBtn.classList.add('active');
+    if (sirenIcon) sirenIcon.classList.add('active');
+    if (sirenStatus) {
+      sirenStatus.textContent = "ACTIVE (Loud)";
+      sirenStatus.style.color = "var(--color-crimson)";
+    }
     logTelemetryEntry("Safety", "Siren Enabled", "--", "--");
     startSirenSound();
+
+    // Update Emergency Overlay Siren button
+    if (emergencySirenBtn) {
+      emergencySirenBtn.classList.add('siren-active');
+    }
+    if (emergencySirenStatus) {
+      emergencySirenStatus.textContent = "Siren ON (Loud)";
+    }
+    if (emergencySirenDesc) {
+      emergencySirenDesc.textContent = "Tap to silence alarm";
+    }
   } else {
     window.appState.sirenActive = false;
-    toggleSirenBtn.classList.remove('active');
-    sirenIcon.classList.remove('active');
-    sirenStatus.textContent = "Inactive";
-    sirenStatus.style.color = "";
+    if (toggleSirenBtn) toggleSirenBtn.classList.remove('active');
+    if (sirenIcon) sirenIcon.classList.remove('active');
+    if (sirenStatus) {
+      sirenStatus.textContent = "Inactive";
+      sirenStatus.style.color = "";
+    }
     logTelemetryEntry("Safety", "Siren Disabled", "--", "--");
     stopSirenSound();
+
+    // Update Emergency Overlay Siren button
+    if (emergencySirenBtn) {
+      emergencySirenBtn.classList.remove('siren-active');
+    }
+    if (emergencySirenStatus) {
+      emergencySirenStatus.textContent = "Toggle Siren";
+    }
+    if (emergencySirenDesc) {
+      emergencySirenDesc.textContent = "Loud acoustic beacon";
+    }
   }
 }
 
@@ -446,20 +497,44 @@ function logTelemetryEntry(type, coords, speed, battery) {
   const now = new Date();
   const timestamp = now.toTimeString().split(' ')[0]; // HH:MM:SS
 
+  // Queue telemetry if it represents positional tracking and we are offline
+  let isOfflineData = false;
+  if (!window.appState.isOnline && (type === 'Track' || type === 'ALERT' || type === 'CRITICAL')) {
+    // Add to offline queue
+    const logItem = { timestamp, type, coords, speed, battery };
+    window.appState.offlineQueue.push(logItem);
+    localStorage.setItem('shakthi_telemetry_queue', JSON.stringify(window.appState.offlineQueue));
+    isOfflineData = true;
+    
+    // Update connectivity UI counter
+    if (typeof window.updateConnectivityUI === 'function') {
+      window.updateConnectivityUI();
+    }
+  }
+
   const entry = document.createElement('div');
   entry.className = `log-row log-entry`;
   if (type === 'CRITICAL' || type === 'ALERT') {
     entry.classList.add('sos-alert-log');
   }
+  
+  if (isOfflineData) {
+    entry.classList.add('offline-log-entry');
+  }
 
   // Format coordinates cleanly if it's a number pair
   let coordsHTML = `<span class="log-coordinate">${coords}</span>`;
   
+  let syncStatusText = battery;
+  if (isOfflineData) {
+    syncStatusText = "QUEUED";
+  }
+
   entry.innerHTML = `
     <span>${timestamp}</span>
     ${coordsHTML}
     <span>${speed}</span>
-    <span>${battery}</span>
+    <span style="${isOfflineData ? 'color: var(--color-amber); font-weight: bold;' : ''}">${syncStatusText}</span>
   `;
 
   // Prepend to show latest at top
@@ -523,4 +598,78 @@ function initContactsEditor() {
     modalOverlay.classList.remove('show');
     logTelemetryEntry("Contacts", "Guardian Info Updated", "--", "--");
   });
+}
+
+/* ==========================================================================
+   8. OFFLINE-FIRST CONNECTIVITY MONITOR & BUFFER QUEUE
+   ========================================================================== */
+function initConnectivityMonitor() {
+  const updateStatus = () => {
+    const isOnline = navigator.onLine;
+    window.appState.isOnline = isOnline;
+    
+    const container = document.getElementById('connection-status');
+    const textEl = document.getElementById('connection-text');
+    
+    if (!container || !textEl) return;
+    
+    if (isOnline) {
+      container.className = "connectivity-status online";
+      container.setAttribute('title', 'Telemetry synced with cloud server');
+      
+      const queueCount = window.appState.offlineQueue.length;
+      if (queueCount > 0) {
+        textEl.textContent = `Sync: Recovering (${queueCount} items)...`;
+        // Flush queue in background
+        flushOfflineQueue();
+      } else {
+        textEl.textContent = "Sync: Connected";
+      }
+      // Set normal cloud icon
+      container.innerHTML = `<i data-lucide="cloud"></i><span id="connection-text">${textEl.textContent}</span>`;
+    } else {
+      container.className = "connectivity-status offline";
+      container.setAttribute('title', 'Device offline (Dead Zone). Buffering data locally.');
+      
+      const queueCount = window.appState.offlineQueue.length;
+      textEl.textContent = `Offline (${queueCount} queued)`;
+      // Set cloud-off icon (strike-through cloud)
+      container.innerHTML = `<i data-lucide="cloud-off"></i><span id="connection-text">${textEl.textContent}</span>`;
+    }
+    
+    // Refresh Lucide icons in container
+    lucide.createIcons();
+  };
+  
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+  
+  // Expose updates to other scripts
+  window.updateConnectivityUI = updateStatus;
+  
+  // Initial check
+  updateStatus();
+}
+
+function flushOfflineQueue() {
+  if (window.appState.offlineQueue.length === 0) return;
+  
+  const itemsToSync = [...window.appState.offlineQueue];
+  const count = itemsToSync.length;
+  
+  logTelemetryEntry("Uplink", `Syncing ${count} buffered entries...`, "--", "Syncing");
+  
+  // Simulate sync delay
+  setTimeout(() => {
+    // Clear queue
+    window.appState.offlineQueue = [];
+    localStorage.removeItem('shakthi_telemetry_queue');
+    
+    // Update UI
+    if (typeof window.updateConnectivityUI === 'function') {
+      window.updateConnectivityUI();
+    }
+    
+    logTelemetryEntry("Uplink", `Sync Completed! ${count} items flushed`, "--", "Online");
+  }, 1500);
 }

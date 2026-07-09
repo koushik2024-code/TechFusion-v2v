@@ -38,6 +38,10 @@
         <span class="pulse-dot"></span>
         <span class="status-text">Telemetry Active</span>
       </div>
+      <div class="connectivity-status online" id="connection-status" title="Cloud Sync Telemetry Status">
+        <i data-lucide="cloud"></i>
+        <span id="connection-text">Sync: Connected</span>
+      </div>
       <div class="clock-display" id="system-clock">
         00:00:00 PM
       </div>
@@ -65,12 +69,6 @@
           </div>
           <p class="countdown-label">Sending alert in...</p>
           <button class="cancel-sos-btn" id="cancel-sos">Cancel</button>
-        </div>
-        <div class="sos-alert-state" id="sos-active-alert">
-          <div class="sos-active-ring"></div>
-          <h2>EMERGENCY ACTIVATED</h2>
-          <p>Location & Audio transmitting to Guardians</p>
-          <button class="deactivate-sos-btn" id="deactivate-sos">Deactivate</button>
         </div>
       </div>
 
@@ -356,6 +354,40 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Fullscreen Emergency Active Overlay -->
+  <div class="sos-alert-state" id="sos-active-alert">
+    <div class="sos-active-ring"></div>
+    <h2 class="emergency-title">EMERGENCY BROADCAST ACTIVE</h2>
+    <p class="emergency-subtitle">Live Location, Audio Feed & Emergency Services Dispatch Synced</p>
+    
+    <div class="emergency-actions-grid">
+      <!-- Call Police -->
+      <a href="tel:112" class="emergency-action-btn btn-police" id="emergency-call-police">
+        <i data-lucide="shield-alert"></i>
+        <div class="btn-label">Call Police (112)</div>
+        <div class="btn-desc">Instant dispatch response</div>
+      </a>
+      
+      <!-- Call Guardian -->
+      <a href="#" class="emergency-action-btn btn-guardian" id="emergency-call-guardian">
+        <i data-lucide="heart"></i>
+        <div class="btn-label">Call Guardian</div>
+        <div class="btn-desc">Notify primary contact</div>
+      </a>
+
+      <!-- Siren Toggle -->
+      <button class="emergency-action-btn btn-siren" id="emergency-toggle-siren">
+        <i data-lucide="volume-2"></i>
+        <div class="btn-label" id="emergency-siren-status">Toggle Siren</div>
+        <div class="btn-desc" id="emergency-siren-desc">Loud acoustic beacon</div>
+      </button>
+    </div>
+
+    <button class="deactivate-sos-btn" id="deactivate-sos">
+      <i data-lucide="shield-off"></i> DEACTIVATE EMERGENCY
+    </button>
   </div>
 
   <!-- Lucide Icons -->
