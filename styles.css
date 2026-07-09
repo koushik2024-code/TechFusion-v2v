@@ -143,6 +143,25 @@ body {
   gap: 20px;
 }
 
+.git-checkin-tracker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: hsla(190, 90%, 50%, 0.08);
+  border: 1px solid hsla(190, 90%, 50%, 0.25);
+  color: var(--color-cyan);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.git-checkin-tracker i {
+  width: 14px;
+  height: 14px;
+  animation: blink-anim 2.5s infinite;
+}
+
 .status-indicator {
   display: flex;
   align-items: center;
