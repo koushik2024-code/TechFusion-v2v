@@ -75,3 +75,4 @@ Instead of requesting external MP3 files (which can lag, fail to load, or hit CO
 The routing simulation interpolates coordinate points along the selected walkway segments.
 * During the animation, a loop calculates the mathematical distance from the user marker to the centroid of each caution zone using the Haversine method (Leaflet's `.distanceTo()` function).
 * If the user enters a caution radius, the safety score (Safety Assessment Gauge) dynamically decreases (e.g., from 98% to 68%), changing the gauge outline color from green to yellow/red and warning the user to return to the illuminated path.
+* 
