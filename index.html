@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shakthi SafeSphere | Women's Safety & Intelligent Transit</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Shakthi SafeSphere is a premium glassmorphic dashboard for women's safety, offering real-time transit routing, location telemetry, and quick emergency actions.">
+  <meta name="keywords" content="safety, security, women empowerment, telemetry, safe transit, emergency SOS">
+  <meta name="author" content="Shakthi Team">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS for Dark Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="dashboard-header">
+    <div class="header-logo">
+      <div class="logo-icon-glow">
+        <i data-lucide="shield-check"></i>
+      </div>
+      <div class="logo-text">
+        <h1>SHAKTHI <span>SAFESPHERE</span></h1>
+        <p class="subtitle">Hackathon Edition v2v</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="status-indicator live">
+        <span class="pulse-dot"></span>
+        <span class="status-text">Telemetry Active</span>
+      </div>
+      <div class="clock-display" id="system-clock">
+        00:00:00 PM
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Dashboard Layout -->
+  <main class="dashboard-container">
+    
+    <!-- LEFT PANEL: Quick Controls & Safety Assessment -->
+    <section class="panel left-panel">
+      <!-- SOS Widget -->
+      <div class="glass-card sos-card">
+        <button class="sos-button" id="sos-trigger">
+          <div class="sos-inner-glow"></div>
+          <span class="sos-text">SOS</span>
+          <span class="sos-subtext">Press and Hold</span>
+        </button>
+        <div class="sos-countdown-overlay" id="sos-countdown-container">
+          <div class="countdown-circle">
+            <svg class="progress-ring" width="120" height="120">
+              <circle class="progress-ring__circle" stroke="#ff3860" stroke-width="6" fill="transparent" r="52" cx="60" cy="60"/>
+            </svg>
+            <div class="countdown-number" id="sos-countdown-num">3</div>
+          </div>
+          <p class="countdown-label">Sending alert in...</p>
+          <button class="cancel-sos-btn" id="cancel-sos">Cancel</button>
+        </div>
+        <div class="sos-alert-state" id="sos-active-alert">
+          <div class="sos-active-ring"></div>
+          <h2>EMERGENCY ACTIVATED</h2>
+          <p>Location & Audio transmitting to Guardians</p>
+          <button class="deactivate-sos-btn" id="deactivate-sos">Deactivate</button>
+        </div>
+      </div>
+
+      <!-- Quick Action Grid -->
+      <div class="action-grid">
+        <!-- Alarm Siren Widget -->
+        <div class="glass-card action-card" id="widget-siren">
+          <div class="action-icon siren">
+            <i data-lucide="volume-2"></i>
+          </div>
+          <div class="action-info">
+            <h3>Siren Alarm</h3>
+            <p id="siren-status-text">Inactive</p>
+          </div>
+          <button class="action-toggle-btn" id="toggle-siren">
+            <span class="toggle-slider"></span>
+          </button>
+        </div>
+
+        <!-- Fake Call Widget -->
+        <div class="glass-card action-card" id="widget-fakecall">
+          <div class="action-icon fakecall">
+            <i data-lucide="phone-call"></i>
+          </div>
+          <div class="action-info">
+            <h3>Fake Call</h3>
+            <p>Simulate Call</p>
+          </div>
+          <button class="action-trigger-btn" id="trigger-fakecall">
+            <i data-lucide="chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Audio Recording Widget -->
+        <div class="glass-card action-card" id="widget-recorder">
+          <div class="action-icon recorder">
+            <i data-lucide="mic"></i>
+          </div>
+          <div class="action-info">
+            <h3>Audio Vault</h3>
+            <p id="record-status-text">Ready</p>
+          </div>
+          <button class="action-trigger-btn" id="trigger-record">
+            <span class="record-dot"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Safety Score Widget -->
+      <div class="glass-card score-card">
+        <div class="card-header">
+          <h3>Zone Safety Assessment</h3>
+          <i data-lucide="info" class="info-icon" title="Evaluated based on historical data, local illumination, active guards, and nearby safe havens."></i>
+        </div>
+        <div class="score-container">
+          <div class="gauge">
+            <svg class="gauge-svg" viewBox="0 0 100 50">
+              <path class="gauge-bg" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2c2c35" stroke-width="8" stroke-linecap="round"/>
+              <path class="gauge-fill" id="safety-gauge-fill" d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="url(#gauge-gradient)" stroke-dasharray="125.6" stroke-dashoffset="12.5" stroke-width="8" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#ff3860" />
+                  <stop offset="50%" stop-color="#ffdd57" />
+                  <stop offset="100%" stop-color="#23d160" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="gauge-value" id="safety-score-value">90%</div>
+          </div>
+        </div>
+        <div class="score-details">
+          <div class="score-badge safe" id="safety-score-badge">High Safety Zone</div>
+          <p class="score-desc" id="safety-score-desc">Well lit area near active safe havens. Recommended path active.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER PANEL: Navigation Map -->
+    <section class="panel center-panel">
+      <div class="glass-card map-card">
+        <div class="map-controls">
+          <div class="search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="route-destination" placeholder="Search destination for safe routing (e.g. Hostels, Library)..." value="CBIT Main Library">
+            <button class="route-btn" id="find-route">
+              <i data-lucide="navigation"></i> Safe Route
+            </button>
+          </div>
+          <div class="map-legends">
+            <span class="legend-item"><span class="legend-color safe"></span>Safe Haven</span>
+            <span class="legend-item"><span class="legend-color danger"></span>Caution Area</span>
+            <span class="legend-item"><span class="legend-color route"></span>Safe Path</span>
+          </div>
+        </div>
+        
+        <!-- Leaflet Map Container -->
+        <div id="map"></div>
+
+        <!-- Simulated Transit routing bar -->
+        <div class="transit-progress-container" id="transit-bar">
+          <div class="transit-info">
+            <div class="transit-step">
+              <i data-lucide="milestone"></i>
+              <span id="transit-status">Awaiting Route Selection...</span>
+            </div>
+            <div class="transit-eta" id="transit-eta">-- mins remaining</div>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="transit-progress-fill" style="width: 0%;"></div>
+            <div class="progress-avatar" id="transit-avatar-indicator" style="left: 0%;">
+              <i data-lucide="user"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Telemetry Logs & Contacts -->
+    <section class="panel right-panel">
+      <!-- Live Status Metrics -->
+      <div class="glass-card metrics-card">
+        <h3>Device Status</h3>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <i data-lucide="battery" class="metric-icon" id="icon-battery"></i>
+            <div class="metric-data">
+              <span class="metric-label">Battery</span>
+              <span class="metric-val" id="metric-battery">98%</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <i data-lucide="signal" class="metric-icon" id="icon-signal"></i>
+            <div class="metric-data">
+              <span class="metric-label">Signal</span>
+              <span class="metric-val" id="metric-signal">Strong (LTE)</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <i data-lucide="activity" class="metric-icon" id="icon-pulse"></i>
+            <div class="metric-data">
+              <span class="metric-label">Telemetry</span>
+              <span class="metric-val" id="metric-tracking">Streaming</span>
+            </div>
+          </div>
+          <div class="metric-item">
+            <i data-lucide="map-pin" class="metric-icon"></i>
+            <div class="metric-data">
+              <span class="metric-label">Geofence</span>
+              <span class="metric-val" id="metric-geofence">Within Safe Area</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Passive Telemetry Log -->
+      <div class="glass-card telemetry-card">
+        <div class="card-header">
+          <h3>Telemetry Uplink</h3>
+          <span class="badge blink">LIVE FEED</span>
+        </div>
+        <div class="telemetry-log" id="telemetry-log-container">
+          <div class="log-row header-row">
+            <span>Time</span>
+            <span>Coordinates</span>
+            <span>Speed</span>
+            <span>Alt</span>
+          </div>
+          <div class="log-entries" id="telemetry-entries">
+            <!-- Simulated logs will be appended here by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Contacts Widget -->
+      <div class="glass-card contacts-card">
+        <div class="card-header">
+          <h3>Emergency Contacts</h3>
+          <button class="edit-btn" id="edit-contacts-btn" title="Edit guardian details">
+            <i data-lucide="edit-3"></i>
+          </button>
+        </div>
+        <div class="contacts-list">
+          <!-- Primary Guardian -->
+          <div class="contact-card primary-guardian">
+            <div class="contact-avatar"><i data-lucide="heart"></i></div>
+            <div class="contact-details">
+              <h4 id="contact-p-name">Ananya Sharma (Guardian)</h4>
+              <p id="contact-p-phone">+91 98765 43210</p>
+            </div>
+            <a href="tel:+919876543210" class="call-icon-btn"><i data-lucide="phone"></i></a>
+          </div>
+
+          <!-- Secondary Guardian -->
+          <div class="contact-card">
+            <div class="contact-avatar"><i data-lucide="user"></i></div>
+            <div class="contact-details">
+              <h4 id="contact-s-name">Rahul Reddy (Guardian)</h4>
+              <p id="contact-s-phone">+91 91234 56789</p>
+            </div>
+            <a href="tel:+919123456789" class="call-icon-btn"><i data-lucide="phone"></i></a>
+          </div>
+
+          <!-- Helplines -->
+          <div class="contact-card helpline">
+            <div class="contact-avatar emergency"><i data-lucide="alert-triangle"></i></div>
+            <div class="contact-details">
+              <h4>National Women's Helpline</h4>
+              <p>1091 (Toll-Free, 24/7)</p>
+            </div>
+            <a href="tel:1091" class="call-icon-btn emergency"><i data-lucide="phone"></i></a>
+          </div>
+
+          <div class="contact-card helpline">
+            <div class="contact-avatar emergency"><i data-lucide="shield"></i></div>
+            <div class="contact-details">
+              <h4>Police Control Room</h4>
+              <p>112 / 100</p>
+            </div>
+            <a href="tel:112" class="call-icon-btn emergency"><i data-lucide="phone"></i></a>
+          </div>
+        </div>
+
+        <!-- Contact Editor Form Overlay (hidden by default) -->
+        <div class="contact-editor-overlay" id="contact-editor-modal">
+          <div class="glass-card editor-modal-card">
+            <h4>Update Emergency Contacts</h4>
+            <div class="input-group">
+              <label for="edit-p-name">Primary Guardian Name</label>
+              <input type="text" id="edit-p-name" value="Ananya Sharma (Guardian)">
+            </div>
+            <div class="input-group">
+              <label for="edit-p-phone">Primary Guardian Phone</label>
+              <input type="text" id="edit-p-phone" value="+91 98765 43210">
+            </div>
+            <div class="input-group">
+              <label for="edit-s-name">Secondary Guardian Name</label>
+              <input type="text" id="edit-s-name" value="Rahul Reddy (Guardian)">
+            </div>
+            <div class="input-group">
+              <label for="edit-s-phone">Secondary Guardian Phone</label>
+              <input type="text" id="edit-s-phone" value="+91 91234 56789">
+            </div>
+            <div class="editor-buttons">
+              <button class="cancel-btn" id="close-editor">Cancel</button>
+              <button class="save-btn" id="save-contacts">Save Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- OVERLAYS -->
+  
+  <!-- Fake Call Screen Overlay -->
+  <div class="fake-call-overlay" id="fake-call-screen">
+    <div class="caller-screen-container">
+      <div class="caller-header">
+        <span class="security-badge"><i data-lucide="shield-check"></i> Safe Sphere Simulator</span>
+        <div class="caller-avatar-ring">
+          <div class="caller-avatar">
+            <i data-lucide="user"></i>
+          </div>
+        </div>
+        <h2 class="caller-name">Dad (Calling...)</h2>
+        <p class="caller-subtext">Mobile +91 98845 28410</p>
+      </div>
+
+      <div class="call-controls">
+        <div class="decline-action">
+          <button class="call-btn btn-decline" id="decline-fakecall">
+            <i data-lucide="phone-off"></i>
+          </button>
+          <span>Decline</span>
+        </div>
+        
+        <div class="accept-action">
+          <button class="call-btn btn-accept" id="accept-fakecall">
+            <i data-lucide="phone"></i>
+          </button>
+          <span>Accept</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Custom Application Scripts -->
+  <script src="app.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>
