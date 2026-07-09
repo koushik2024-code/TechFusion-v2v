@@ -75,15 +75,3 @@ Instead of requesting external MP3 files (which can lag, fail to load, or hit CO
 The routing simulation interpolates coordinate points along the selected walkway segments.
 * During the animation, a loop calculates the mathematical distance from the user marker to the centroid of each caution zone using the Haversine method (Leaflet's `.distanceTo()` function).
 * If the user enters a caution radius, the safety score (Safety Assessment Gauge) dynamically decreases (e.g., from 98% to 68%), changing the gauge outline color from green to yellow/red and warning the user to return to the illuminated path.
-
----
-
-## How to Enable GitHub Pages (Deployment)
-
-To host your live prototype on GitHub Pages for free:
-1. Go to your repository on GitHub: `https://github.com/koushik2024-code/TechFusion-v2v`
-2. Click on the **Settings** tab.
-3. In the left menu, under "Code and automation", click **Pages**.
-4. Under "Build and deployment", set **Source** to **Deploy from a branch**.
-5. Under **Branch**, select **`main`** and **`/ (root)`**, then click **Save**.
-6. Wait 30 seconds, and your live URL `https://koushik2024-code.github.io/TechFusion-v2v/` will be active!
