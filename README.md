@@ -6,7 +6,8 @@
 ---
 
 ## Important Links
-* 🟢 **Live Deployment Link**: [https://techfusion-v2v.github.io/techfusion-v2v/](https://techfusion-v2v.github.io/techfusion-v2v/) *(Update with your deployed URL once pushed to GitHub Pages)*
+* 🟢 **Live Deployment Link**: [https://koushik2024-code.github.io/TechFusion-v2v/](https://koushik2024-code.github.io/TechFusion-v2v/)  
+  *(See deployment instructions below to make this live in 10 seconds)*
 * 🎥 **Demo Video Link**: [Insert Google Drive / YouTube Video Link here]
 
 ---
@@ -28,9 +29,27 @@
 
 ---
 
+## Women-Centric Impact & Intentionality
+
+SafeSphere was designed from the ground up to address specific physical and psychological safety challenges faced by women during transit:
+1. **Accident-Proof Panic Controls**: Typical SOS buttons trigger instantly, leading to high rates of false alarms and users disabling them. Our **3-second press-and-hold countdown** ensures intentionality while providing an immediate exit.
+2. **De-escalation via Fake Call**: Women frequently encounter uncomfortable, non-emergency situations (unwanted conversations, trailing strangers) where a direct alert is too drastic. The **Fake Call Simulator** provides a socially acceptable, instant excuse to detach and move to safety.
+3. **Proactive Safe Routing**: Rather than just showing the fastest route, the dashboard evaluates pathways based on illumination, CCTV, and proximity to active guards, keeping the traveler informed before they step into a caution zone.
+4. **Synthesized Siren for Deterrence**: A high-frequency physical siren acts as an immediate local deterrent, drawing bystander attention and discouraging potential offenders.
+
+---
+
+## UI/UX Design Philosophy
+* **High Contrast Dark Aesthetics**: Designed for night-time use to prevent glare and maintain low visibility of the phone screen in dark areas.
+* **Glassmorphic Depth**: Frosted-glass overlays create clear visual hierarchies without cluttering the screen.
+* **Single-Tap Accessibility**: Core emergency triggers (SOS, Siren, Fake Call) are oversized and positioned within easy thumb reach.
+* **Micro-Animations**: Beacon rings, pulse indicators, and shaker alerts give immediate visual confirmation of active operations.
+
+---
+
 ## Tech Stack & Tools
 * **Core Technologies**: Semantic HTML5, Vanilla CSS3 (CSS Variables, Flexbox/Grid, Glassmorphic filters, keyframe animations), Vanilla JavaScript (ES6+).
-* **Mapping**: Leaflet.js (loaded via CDN) & CartoDB Dark Matter Tile Services.
+* **Mapping**: Leaflet.js & CartoDB Dark Matter Tile Services.
 * **Icons & Fonts**: Lucide Icons, Google Fonts (Outfit & Inter).
 * **AI Tools**: **Antigravity AI (Google DeepMind)** utilized for rapid prototype design, HSL theme selection, Web Audio API DSP synthesis logic, and map routing math.
 
@@ -59,20 +78,12 @@ The routing simulation interpolates coordinate points along the selected walkway
 
 ---
 
-## How to Deploy Locally
+## How to Enable GitHub Pages (Deployment)
 
-1. Clone or download the repository folder:
-   ```bash
-   git clone https://github.com/your-username/techfusion-v2v.git
-   cd techfusion-v2v
-   ```
-2. Run a simple local web server:
-   * **Using Node (npx)**:
-     ```bash
-     npx -y http-server .
-     ```
-   * **Using Python**:
-     ```bash
-     python -m http.server 8080
-     ```
-3. Open `http://localhost:8080` (or the port specified by Python/Node) in your browser.
+To host your live prototype on GitHub Pages for free:
+1. Go to your repository on GitHub: `https://github.com/koushik2024-code/TechFusion-v2v`
+2. Click on the **Settings** tab.
+3. In the left menu, under "Code and automation", click **Pages**.
+4. Under "Build and deployment", set **Source** to **Deploy from a branch**.
+5. Under **Branch**, select **`main`** and **`/ (root)`**, then click **Save**.
+6. Wait 30 seconds, and your live URL `https://koushik2024-code.github.io/TechFusion-v2v/` will be active!
