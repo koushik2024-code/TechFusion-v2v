@@ -75,3 +75,11 @@ Instead of requesting external MP3 files (which can lag, fail to load, or hit CO
 The routing simulation interpolates coordinate points along the selected walkway segments.
 * During the animation, a loop calculates the mathematical distance from the user marker to the centroid of each caution zone using the Haversine method (Leaflet's `.distanceTo()` function).
 * If the user enters a caution radius, the safety score (Safety Assessment Gauge) dynamically decreases (e.g., from 98% to 68%), changing the gauge outline color from green to yellow/red and warning the user to return to the illuminated path.
+
+#### 4. Offline-First Telemetry Sync & Local Buffering (Dead Zones)
+To handle situations where the user enters a cellular "dead zone" (disconnected/no internet access):
+* **Real-time Connection Detection**: The application utilizes standard browser connection APIs (`navigator.onLine` and window `online`/`offline` events) to monitor connectivity in real time.
+* **Visual Status Indicator**: When offline, the header dynamically updates to display a prominent warning indicator featuring a strike-through Cloud (`cloud-off`) icon and showing the count of queued telemetry records.
+* **Local Buffer Queuing**: If a telemetry point is recorded (either regular interval logging or SOS telemetry broadcast) while offline, the system intercepts the event, serializes the telemetry record, and queues it in the browser's `localStorage` (under the key `shakthi_telemetry_queue`). This guarantees data persistence even if the browser is closed, the tab is reloaded, or the device loses power.
+* **Local UI Feedback**: Telemetry entries captured offline are styled with a distinct yellow warning indicator and marked as `QUEUED` in the telemetry uplink logs.
+* **Auto-Recovery Background Sync**: When connection is restored (triggering the `online` event), a sync manager automatically reads the buffered entries from `localStorage`, batches them, simulates a secure background synchronization to the cloud server, and flushes the queue, returning the indicator status to `Sync: Connected`.
