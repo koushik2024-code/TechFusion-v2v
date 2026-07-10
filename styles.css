@@ -806,6 +806,7 @@ body {
 }
 
 .record-dot {
+  display: inline-block;
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -1914,5 +1915,6 @@ body {
 .im-safe-btn svg { width: 14px; height: 14px; }
 .report-hazard-btn svg { width: 14px; height: 14px; }
 .hazard-opt svg { width: 14px; height: 14px; }
+.action-trigger-btn svg { width: 16px; height: 16px; }
 
 
