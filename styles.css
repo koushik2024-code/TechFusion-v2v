@@ -4,38 +4,37 @@
 
 /* 1. Global Reset & Variables */
 :root {
-  /* Color Palette (HSL for premium theme control) */
+  /* Color Palette */
   --bg-dark: hsl(222, 24%, 6%);
   --bg-card: hsla(222, 20%, 10%, 0.55);
   --bg-card-hover: hsla(222, 20%, 15%, 0.7);
-  
+
   --border-glass: hsla(0, 0%, 100%, 0.08);
   --border-glass-glow: hsla(0, 0%, 100%, 0.18);
-  
+
   --color-crimson: hsl(348, 100%, 61%);
   --color-crimson-glow: hsla(348, 100%, 61%, 0.35);
-  
   --color-emerald: hsl(140, 71%, 48%);
   --color-emerald-glow: hsla(140, 71%, 48%, 0.3);
-  
   --color-amber: hsl(48, 100%, 60%);
   --color-amber-glow: hsla(48, 100%, 60%, 0.3);
-  
   --color-cyan: hsl(190, 90%, 50%);
   --color-cyan-glow: hsla(190, 90%, 50%, 0.25);
-  
+
   --text-primary: hsl(210, 20%, 98%);
   --text-secondary: hsl(215, 15%, 75%);
   --text-muted: hsl(215, 12%, 55%);
-  
-  /* Layout Settings */
+
   --header-height: 70px;
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
-  /* Fonts */
+
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Mouse tracking variables (updated by effects.js) */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 
 * {
@@ -52,11 +51,76 @@ body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  background-image: 
-    radial-gradient(circle at 10% 20%, hsla(348, 60%, 20%, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, hsla(190, 60%, 20%, 0.12) 0%, transparent 45%),
+  background-image:
+    radial-gradient(ellipse at var(--mouse-x) var(--mouse-y), hsla(190, 90%, 50%, 0.06) 0%, transparent 55%),
+    radial-gradient(circle at 10% 20%, hsla(348, 60%, 25%, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, hsla(190, 60%, 20%, 0.15) 0%, transparent 45%),
     radial-gradient(circle at 50% 50%, hsla(222, 30%, 8%, 1) 0%, var(--bg-dark) 100%);
   background-attachment: fixed;
+}
+
+/* Animated background orbs */
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+.bg-orb-1 {
+  width: 600px;
+  height: 600px;
+  top: -150px;
+  left: -150px;
+  background: radial-gradient(circle, hsla(348, 100%, 55%, 0.18) 0%, transparent 70%);
+  animation: orb-float-1 18s ease-in-out infinite alternate;
+}
+
+.bg-orb-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -100px;
+  right: -100px;
+  background: radial-gradient(circle, hsla(190, 90%, 50%, 0.16) 0%, transparent 70%);
+  animation: orb-float-2 22s ease-in-out infinite alternate;
+}
+
+.bg-orb-3 {
+  width: 400px;
+  height: 400px;
+  top: 45%;
+  left: 40%;
+  background: radial-gradient(circle, hsla(140, 71%, 45%, 0.10) 0%, transparent 70%);
+  animation: orb-float-3 15s ease-in-out infinite alternate;
+}
+
+@keyframes orb-float-1 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(80px, 60px) scale(1.1); }
+  66%  { transform: translate(40px, 120px) scale(0.95); }
+  100% { transform: translate(120px, 30px) scale(1.05); }
+}
+
+@keyframes orb-float-2 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(-90px, -50px) scale(1.08); }
+  66%  { transform: translate(-40px, -100px) scale(0.92); }
+  100% { transform: translate(-110px, -20px) scale(1.12); }
+}
+
+@keyframes orb-float-3 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  50%  { transform: translate(-60px, 80px) scale(1.15); }
+  100% { transform: translate(70px, -60px) scale(0.88); }
+}
+
+/* Glass cards get smooth 3D transition prep */
+.glass-card {
+  transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.4s;
+  will-change: transform;
 }
 
 /* Scrollbar styling */
