@@ -18,10 +18,10 @@
   * *Web Audio Alarm Siren*: A programmatically synthesized dual-tone siren alarm (sweeping frequencies) that can be activated to draw immediate physical attention.
   * *Fake Call Simulator & Shake Trigger*: An overlay simulating a realistic incoming phone call screen (avatar vibration, accept/decline triggers) to help users escape uncomfortable situations. Can be triggered instantly, or physically activated by shaking the device (enabled via toggle switch). Features a built-in keyboard shortcut (`S` key) to simulate shake on desktop setups.
   * *Audio Vault*: Visual micro-action simulating ambient audio capture with an animated sine-wave visualizer canvas that pulses when recording is active.
-  * *Voice Guardian*: An interactive voice-activated SOS trigger using Web Speech API that listens for safety keywords (`help`, `sos`, `emergency`) to start the countdown. It also listens for `stop` or `cancel` during an active emergency to stop the alarm and turn the listening loop OFF permanently.
+  * *Voice Guardian*: An interactive voice-activated SOS trigger using Web Speech API that listens for safety keywords (`help`, `sos`, `emergency`) to start the countdown. It also listens for `stop` or `cancel` during the countdown or an active emergency to stop the alarm and turn the listening loop OFF permanently.
   * *Emergency Contacts Manager*: In-app editor overlay to customize primary and secondary guardian details.
 * **Feature 2: Real-time passive location telemetry**
-  * *Device Status Panel*: Interactive cards display signal strength, telemetry streaming status, and battery percentage (which drains slightly over time). Features a real-time glowing canvas line chart showing tracking speed and latency.
+  * *Device Status Panel*: Interactive cards display signal strength, telemetry streaming status, and battery percentage (which drains slightly over time). Features a real-time glowing canvas line chart showing tracking speed and latency with a dynamic text readout (`TELEMETRY: XX KM/H`).
   * *Telemetry Uplink Log*: A scrolling terminal feed showing active timestamps, coordinate streams (centered around CBIT Hyderabad campus paths), walking speed, and battery health.
 * **Feature 3: Responsive, motion-driven transit routing map**
   * *Dark Matter Theme*: Minimalist Leaflet.js base map using CartoDB Dark Matter tiles to fit the premium dark UI theme.
@@ -44,7 +44,7 @@ SafeSphere was designed from the ground up to address specific physical and psyc
 
 ## UI/UX Design Philosophy
 * **High Contrast Dark Aesthetics**: Designed for night-time use to prevent glare and maintain low visibility of the phone screen in dark areas.
-* **Ambient Glow & Grid Texture**: Deep blue-violet mesh background with a subtle high-tech dot-matrix grid and mouse-following spotlight glow.
+* **Double Dot-Matrix Grid Background**: Deep blue-violet mesh background with a double-layered, subtle CSS dot-matrix grid (spacing at `30px` and `60px` with low opacity) and mouse-following spotlight glow.
 * **Glassmorphic Depth & Static Layout**: Frosted-glass overlays create clear visual hierarchies without cluttering the screen. Cards remain static and fixed on hover to ensure click targets remain precise under high-stress conditions.
 * **Single-Tap Accessibility**: Core emergency triggers (SOS, Siren, Fake Call) are oversized and positioned within easy thumb reach.
 * **Micro-Animations**: Beacon rings, pulse indicators, and shaker alerts give immediate visual confirmation of active operations.
@@ -112,8 +112,8 @@ To build a collaborative community protection network:
 #### 8. Voice Activation Guardian & Smart Feedback Prevention
 The Voice Guardian leverages the browser's Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`) to parse audio inputs:
 * **SOS Activation**: When inactive, listening for keywords like `"help"`, `"sos"`, `"emergency"`, or `"alert"` triggers the 3-second SOS countdown sequence.
-* **Smart Stop Command**: When the emergency state is active, the parser blocks standard triggers and listens only for `"stop"`, `"cancel"`, or `"deactivate"`. If matched, the emergency overlay is dismissed, the siren is silenced, and the Voice Guardian listener is toggled OFF completely, ensuring the microphone stops listening and avoids re-triggering.
+* **Smart Stop/Cancel Command**: If either the 3-second countdown is ticking (`sosCountdownActive === true`) or the full emergency state is active (`sosActive === true`), the system intercepts the loop and listens specifically for deactivation commands (`"stop"`, `"cancel"`, `"deactivate"`). Hearing one will immediately cancel/dismiss the alert, silence any audio oscillators, and toggle the Voice Guardian OFF completely, disabling the microphone to stop listening permanently.
 
 #### 9. Real-Time Canvas-Based Visualizers
-* **Telemetry Chart**: Renders a scrolling line chart using HTML5 Canvas 2D contexts, showing speed and network latency variations. It handles high-DPI displays via device pixel ratio scaling and automatically renders grid lines and glowing cyan path lines.
+* **Telemetry Chart**: Renders a scrolling line chart using HTML5 Canvas 2D contexts, showing speed and network latency variations. It handles high-DPI displays via device pixel ratio scaling, automatically renders grid lines, glowing cyan path lines, and overlays a real-time speed text readout (`TELEMETRY: XX KM/H`).
 * **Audio Waveform**: Renders three superimposed sine waves with shifted phase values (sine wave animations) to represent audio recording activity.
