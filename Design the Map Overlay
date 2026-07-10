@@ -1,0 +1,97 @@
+:root {
+    --color-emerald: #10b981;
+    --color-crimson: #e11d48;
+    --color-cyan: #06b6d4;
+    --text-secondary: #94a3b8;
+    --bg-dark: #0f172a;
+    --panel-bg: rgba(15, 23, 42, 0.9);
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+}
+
+/* Map Container */
+#map {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+/* UI Panels Layout */
+.ui-panel {
+
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: var(--panel-bg);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 1000; /* Stays above Leaflet map */
+    color: white;
+}
+
+.top-panel {
+    top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.bottom-panel {
+    bottom: 30px;
+}
+
+/* Inputs and Buttons */
+input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-cyan);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#sos-btn { background: var(--color-crimson); }
+#clear-sos-btn { background: #333; }
+
+/* Dashboard and Progress Elements */
+.safety-dashboard { display: flex; align-items: center; gap: 20px; }
+.safety-gauge { width: 80px; height: 40px; }
+.score-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+.score-badge.safe { background: var(--color-emerald); }
+.score-badge.warning { background: orange; }
+.score-badge.danger { background: var(--color-crimson); }
+
+.progress-container { margin-top: 15px; }
+.progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; position: relative; }
+.progress-fill { height: 100%; background: var(--color-cyan); width: 0%; border-radius: 3px; transition: width 0.5s; }
+.avatar-indicator { position: absolute; top: -10px; left: 0%; transform: translateX(-50%); transition: left 0.5s; }
+
+/* Custom Leaflet Marker Pins */
+.marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.marker-pin.user { background: var(--color-cyan); }
+.marker-pin.safe { background: var(--color-emerald); border: 2px solid white; }
+.marker-pin.caution { background: var(--color-crimson); }
