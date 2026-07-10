@@ -1,0 +1,129 @@
+:root {
+    --color-emerald: #10b981;
+    --color-crimson: #e11d48;
+    --color-cyan: #06b6d4;
+    --text-secondary: #94a3b8;
+    --bg-dark: #0f172a;
+    --panel-bg: rgba(15, 23, 42, 0.9);
+}
+
+/* body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+} */
+
+/* Map Container (Commented out to prevent conflict with styles.css flex layout) */
+/* #map {
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+} */
+
+/* UI Panels Layout */
+.ui-panel {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 94%;
+    max-width: 540px;
+    background: hsla(222, 25%, 8%, 0.78);
+    border: 1px solid hsla(0, 0%, 100%, 0.08);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
+    z-index: 1000; /* Stays above Leaflet map */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.top-panel {
+    top: 14px;
+}
+
+.bottom-panel {
+    bottom: 14px;
+}
+
+/* Inputs and Buttons */
+input[type="text"] {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-cyan);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#sos-btn { background: var(--color-crimson); }
+#clear-sos-btn { background: #333; }
+
+/* Dashboard and Progress Elements */
+.safety-dashboard { display: flex; align-items: center; gap: 20px; }
+.safety-gauge { width: 80px; height: 40px; }
+.score-badge { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; }
+.score-badge.safe { background: var(--color-emerald); }
+.score-badge.warning { background: orange; }
+.score-badge.danger { background: var(--color-crimson); }
+
+.progress-container { margin-top: 15px; }
+.progress-bar { width: 100%; height: 6px; background: #333; border-radius: 3px; position: relative; }
+.progress-fill { height: 100%; background: var(--color-cyan); width: 0%; border-radius: 3px; transition: width 0.5s; }
+.avatar-indicator { position: absolute; top: -10px; left: 0%; transform: translateX(-50%); transition: left 0.5s; }
+
+/* Custom Leaflet Marker Pins */
+.marker-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.marker-pin.user { background: var(--color-cyan); }
+.marker-pin.safe { background: var(--color-emerald); border: 2px solid white; }
+.marker-pin.caution { background: var(--color-crimson); }
+
+/* Specific Overrides for TechFusion Dashboard Compatibility */
+.map-controls.ui-panel {
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.08);
+    background: hsla(222, 25%, 8%, 0.78) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+}
+
+.map-controls.ui-panel .search-box {
+    width: 100%;
+}
+
+.map-controls.ui-panel .map-legends {
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.transit-progress-container.ui-panel {
+    border-top: 1px solid hsla(0, 0%, 100%, 0.08);
+    background: hsla(222, 25%, 8%, 0.78) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
