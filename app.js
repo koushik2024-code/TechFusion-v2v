@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
     timeElapsed: 0,
     activeRoute: null,
     isOnline: navigator.onLine,
-    offlineQueue: JSON.parse(localStorage.getItem('shakthi_telemetry_queue') || '[]')
+    offlineQueue: JSON.parse(localStorage.getItem('shakthi_telemetry_queue') || '[]'),
+    shakeActive: false
   };
 
   // Initialize Modules
@@ -34,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initTelemetryLog();
   initContactsEditor();
   initConnectivityMonitor();
+  initArrivalVerification();
+  initHazardReporting();
 });
 
 /* ==========================================================================
@@ -146,6 +149,9 @@ function initSOS() {
       window.mapModule.triggerEmergencyOnMap();
     }
   };
+
+  // Expose to window for arrival check-in fallback
+  window.activateEmergencyBroadcast = activateEmergency;
 
   const deactivateEmergency = () => {
     window.appState.sosActive = false;
@@ -329,14 +335,22 @@ function initFakeCall() {
   const screenOverlay = document.getElementById('fake-call-screen');
   const declineBtn = document.getElementById('decline-fakecall');
   const acceptBtn = document.getElementById('accept-fakecall');
+  
+  // Shake configuration elements
+  const toggleShakeBtn = document.getElementById('toggle-shake-call');
+  const shakeStatusText = document.getElementById('shake-status-text');
+
+  const triggerCallInstantly = () => {
+    logTelemetryEntry("Safety", "Incoming Fake Call Active", "--", "--");
+    screenOverlay.classList.add('active');
+    startFakeCallRing();
+  };
 
   triggerBtn.addEventListener('click', () => {
     logTelemetryEntry("Safety", "Scheduling Fake Call...", "--", "--");
     // 2-second delay to allow putting phone down/away
     setTimeout(() => {
-      screenOverlay.classList.add('active');
-      startFakeCallRing();
-      logTelemetryEntry("Safety", "Incoming Fake Call Active", "--", "--");
+      triggerCallInstantly();
     }, 2000);
   });
 
@@ -348,6 +362,105 @@ function initFakeCall() {
 
   declineBtn.addEventListener('click', () => stopCall("Declined"));
   acceptBtn.addEventListener('click', () => stopCall("Accepted"));
+
+  // Shake to Trigger Switch logic
+  if (toggleShakeBtn) {
+    toggleShakeBtn.addEventListener('click', () => {
+      const active = !window.appState.shakeActive;
+      window.appState.shakeActive = active;
+      
+      if (active) {
+        toggleShakeBtn.classList.add('active');
+        shakeStatusText.textContent = "Shake to Trigger: ON";
+        shakeStatusText.style.color = "var(--color-emerald)";
+        logTelemetryEntry("Safety", "Shake-to-Decoy Activated", "--", "--");
+        
+        // Request Device Motion permissions on mobile if supported
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          DeviceMotionEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                console.log("DeviceMotion sensor access granted.");
+              } else {
+                console.warn("DeviceMotion access denied.");
+                shakeStatusText.textContent = "Shake to Trigger: Permission Denied";
+                shakeStatusText.style.color = "var(--color-crimson)";
+              }
+            })
+            .catch(err => {
+              console.error("Error requesting DeviceMotion permission: ", err);
+            });
+        }
+      } else {
+        toggleShakeBtn.classList.remove('active');
+        shakeStatusText.textContent = "Shake to Trigger: OFF";
+        shakeStatusText.style.color = "";
+        logTelemetryEntry("Safety", "Shake-to-Decoy Deactivated", "--", "--");
+      }
+    });
+  }
+
+  // Device Motion Shake detection event
+  let lastX = null, lastY = null, lastZ = null;
+  let lastUpdate = 0;
+  
+  window.addEventListener('devicemotion', (event) => {
+    if (!window.appState.shakeActive) return;
+    
+    // Prevent shake trigger if the decoy screen is already active
+    if (screenOverlay.classList.contains('active')) return;
+
+    const acceleration = event.accelerationIncludingGravity || event.acceleration;
+    if (!acceleration) return;
+
+    const curTime = Date.now();
+    if ((curTime - lastUpdate) > 100) {
+      const diffTime = curTime - lastUpdate;
+      lastUpdate = curTime;
+
+      const x = acceleration.x;
+      const y = acceleration.y;
+      const z = acceleration.z;
+
+      if (lastX !== null) {
+        // Calculate motion delta
+        const deltaX = Math.abs(x - lastX);
+        const deltaY = Math.abs(y - lastY);
+        const deltaZ = Math.abs(z - lastZ);
+        
+        // Compute speed index based on acceleration change over time
+        const speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
+        
+        // Threshold check: 18+ represents sudden shaking force
+        if (speed > 18) {
+          logTelemetryEntry("CRITICAL", "SHAKE EVENT DETECTED", "--", "Decoy");
+          triggerCallInstantly();
+        }
+      }
+      lastX = x;
+      lastY = y;
+      lastZ = z;
+    }
+  });
+
+  // Desktop keyboard simulator trigger ('S' key) for presentation demonstration
+  window.addEventListener('keydown', (event) => {
+    if (!window.appState.shakeActive) return;
+    
+    // Ignore keys if user is typing in input fields
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+      return;
+    }
+    
+    if (event.key === 'S' || event.key === 's') {
+      // Prevent double trigger if decoy screen is already visible
+      if (screenOverlay.classList.contains('active')) return;
+
+      logTelemetryEntry("CRITICAL", "SIMULATED SHAKE EVENT", "--", "Decoy");
+      triggerCallInstantly();
+    }
+  });
 }
 
 function startFakeCallRing() {
@@ -672,4 +785,113 @@ function flushOfflineQueue() {
     
     logTelemetryEntry("Uplink", `Sync Completed! ${count} items flushed`, "--", "Online");
   }, 1500);
+}
+
+/* ==========================================================================
+   9. SAFE ARRIVAL VERIFICATION & CHECK-IN
+   ========================================================================== */
+let verificationCountdownInterval = null;
+
+function initArrivalVerification() {
+  const verificationBar = document.getElementById('arrival-verification');
+  const timerEl = document.getElementById('verification-timer');
+  const safeTriggerBtn = document.getElementById('im-safe-trigger');
+  
+  if (!safeTriggerBtn) return;
+  
+  safeTriggerBtn.addEventListener('click', () => {
+    // User checked in safe!
+    clearInterval(verificationCountdownInterval);
+    verificationCountdownInterval = null;
+    if (verificationBar) verificationBar.style.display = 'none';
+    
+    const transitStatusText = document.getElementById('transit-status');
+    const transitETAText = document.getElementById('transit-eta');
+    if (transitStatusText) transitStatusText.textContent = 'Arrived safely at destination!';
+    if (transitETAText) transitETAText.textContent = '0 mins remaining';
+    
+    // Log safe arrival
+    logTelemetryEntry("Arrived", "Checked in Safe (Manual)", "0 km/h", `${window.appState.currentBattery}%`);
+  });
+  
+  window.triggerArrivalVerification = (endCoords) => {
+    // Show verification prompt
+    if (verificationBar) verificationBar.style.display = 'flex';
+    
+    let timeRemaining = 10; // 10 seconds for demo convenience
+    if (timerEl) timerEl.textContent = `${timeRemaining}s`;
+    
+    logTelemetryEntry("Arrival Check", "Verification countdown initialized (10s)", "--", "--");
+    
+    clearInterval(verificationCountdownInterval);
+    verificationCountdownInterval = setInterval(() => {
+      timeRemaining--;
+      if (timerEl) timerEl.textContent = `${timeRemaining}s`;
+      
+      if (timeRemaining <= 0) {
+        clearInterval(verificationCountdownInterval);
+        verificationCountdownInterval = null;
+        if (verificationBar) verificationBar.style.display = 'none';
+        
+        // User failed to check in (Incapacitated scenario!)
+        logTelemetryEntry("CRITICAL", "NO ARRIVAL CHECK-IN RECEIVED (INCAPACITATED)", "0 km/h", "ALERT");
+        
+        // Trigger SOS emergency broadcast immediately!
+        if (typeof window.activateEmergencyBroadcast === 'function') {
+          window.activateEmergencyBroadcast();
+        } else {
+          const sosTrigger = document.getElementById('sos-trigger');
+          if (sosTrigger) sosTrigger.click();
+        }
+      }
+    }, 1000);
+  };
+}
+
+/* ==========================================================================
+   10. COMMUNITY HAZARD REPORTING (CROWDSOURCING)
+   ========================================================================== */
+function initHazardReporting() {
+  const triggerBtn = document.getElementById('report-hazard-trigger');
+  const modalOverlay = document.getElementById('hazard-report-modal');
+  const closeBtn = document.getElementById('close-hazard');
+  const hazardOptions = document.querySelectorAll('.hazard-opt');
+
+  if (!triggerBtn || !modalOverlay) return;
+
+  // Show selection overlay
+  triggerBtn.addEventListener('click', () => {
+    modalOverlay.classList.add('show');
+  });
+
+  // Hide selection overlay
+  closeBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+  });
+
+  // Handle hazard choice clicks
+  hazardOptions.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-type');
+      const lat = window.appState.currentLat;
+      const lng = window.appState.currentLng;
+
+      // Anonymously spawn hazard warning indicators on Map
+      if (window.mapModule && typeof window.mapModule.addCommunityHazard === 'function') {
+        window.mapModule.addCommunityHazard(lat, lng, type);
+      }
+
+      // Live update Zone Safety rating index
+      // Drops safety index from initial 90% down to 52%, updating gauge rings and warnings
+      if (window.mapModule && typeof window.mapModule.updateSafetyAssessmentScore === 'function') {
+        window.mapModule.updateSafetyAssessmentScore(52, "Local Hazard Reported", `Anonymized community report of ${type} nearby.`);
+      }
+
+      // Log in Telemetry Uplink feed
+      logTelemetryEntry("Community", `Anon: ${type} reported nearby`, "--", "Alert");
+
+      // Close modal
+      modalOverlay.classList.remove('show');
+    });
+  });
 }

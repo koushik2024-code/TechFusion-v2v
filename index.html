@@ -95,9 +95,14 @@
           </div>
           <div class="action-info">
             <h3>Fake Call</h3>
-            <p>Simulate Call</p>
+            <p id="shake-status-text">Shake to Trigger: OFF</p>
           </div>
-          <button class="action-trigger-btn" id="trigger-fakecall">
+          <!-- Toggle Shake Call Switch -->
+          <button class="action-toggle-btn" id="toggle-shake-call" title="Enable Shake to Activate Fake Call">
+            <span class="toggle-slider"></span>
+          </button>
+          <!-- Trigger Instantly -->
+          <button class="action-trigger-btn" id="trigger-fakecall" title="Simulate Call Instantly">
             <i data-lucide="chevron-right"></i>
           </button>
         </div>
@@ -143,6 +148,27 @@
           <div class="score-badge safe" id="safety-score-badge">High Safety Zone</div>
           <p class="score-desc" id="safety-score-desc">Well lit area near active safe havens. Recommended path active.</p>
         </div>
+        
+        <!-- Report Hazard Trigger -->
+        <div class="report-hazard-container" style="margin-top: 14px; border-top: 1px solid var(--border-glass); padding-top: 12px;">
+          <button class="report-hazard-btn" id="report-hazard-trigger" title="Report a safety hazard at your location">
+            <i data-lucide="alert-octagon"></i> Report Local Hazard
+          </button>
+        </div>
+
+        <!-- Hazard Selection Overlay (hidden by default) -->
+        <div class="contact-editor-overlay" id="hazard-report-modal">
+          <div class="glass-card editor-modal-card">
+            <h4>Anonymously Report Hazard</h4>
+            <div class="hazard-options">
+              <button class="hazard-opt" data-type="Broken Streetlights"><i data-lucide="lightbulb-off"></i> Broken Streetlights</button>
+              <button class="hazard-opt" data-type="Suspicious Group"><i data-lucide="users"></i> Suspicious Group</button>
+              <button class="hazard-opt" data-type="Isolated Area"><i data-lucide="navigation-off"></i> Desolate Path</button>
+              <button class="hazard-opt" data-type="Road Obstruction"><i data-lucide="construction"></i> Road Obstruction</button>
+            </div>
+            <button class="cancel-btn" id="close-hazard" style="width: 100%; margin-top: 10px;">Cancel</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -181,6 +207,13 @@
             <div class="progress-avatar" id="transit-avatar-indicator" style="left: 0%;">
               <i data-lucide="user"></i>
             </div>
+          </div>
+          <!-- Safe Arrival Check-in Overlay inside transit bar -->
+          <div class="arrival-verification-bar" id="arrival-verification" style="display: none;">
+            <span class="verification-label"><i data-lucide="shield-alert"></i> Confirm Safe Arrival: <b id="verification-timer">10s</b></span>
+            <button class="im-safe-btn" id="im-safe-trigger">
+              <i data-lucide="shield-check"></i> I'm Safe
+            </button>
           </div>
         </div>
       </div>
