@@ -7,20 +7,20 @@
     --panel-bg: rgba(15, 23, 42, 0.9);
 }
 
-body, html {
+/* body, html {
     margin: 0;
     padding: 0;
     height: 100%;
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-dark);
-}
+} */
 
-/* Map Container */
-#map {
+/* Map Container (Commented out to prevent conflict with styles.css flex layout) */
+/* #map {
     height: 100%;
     width: 100%;
     z-index: 1;
-}
+} */
 
 /* UI Panels Layout */
 .ui-panel {
