@@ -29,6 +29,19 @@
         <p class="subtitle">Hackathon Edition v2v</p>
       </div>
     </div>
+    
+    <!-- Header Navigation Tabs -->
+    <nav class="header-nav">
+      <button class="nav-btn active" id="nav-dashboard" title="View Real-Time Safety Dashboard">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-btn" id="nav-about" title="Read About SafeSphere & Regional Safety Impact">
+        <i data-lucide="info"></i>
+        <span>About & Impact</span>
+      </button>
+    </nav>
+
     <div class="header-stats">
       <div class="git-checkin-tracker" title="V2V Hackathon Required 6-Hour Git Commit Progress Tracker">
         <i data-lucide="git-commit"></i>
@@ -354,6 +367,144 @@
     </section>
 
   </main>
+
+  <!-- ABOUT & IMPACT SECTION -->
+  <section id="about-section" class="about-container hidden">
+    <div class="about-hero">
+      <div class="about-badge"><i data-lucide="award"></i> Hackathon Focus Area</div>
+      <h2>Bridging Critical Gaps in Women's Safety</h2>
+      <p class="about-lead">SafeSphere is built to address infrastructure deficiencies, communication latency, and passive response systems in our regions.</p>
+    </div>
+
+    <div class="about-grid">
+      <!-- Left Column: The Problem & Gaps -->
+      <div class="about-column problem-column">
+        <div class="column-header">
+          <i data-lucide="alert-circle" class="icon-danger"></i>
+          <h3>The Challenge: Real-world Safety Gaps</h3>
+        </div>
+        <p class="section-intro-text">
+          Traditional distress tools rely heavily on cellular carrier signals, manual operations, and slow contact trees. These methods fall short when facing immediate safety threats in local urban environments.
+        </p>
+
+        <!-- Stat Card 1 -->
+        <div class="glass-card stat-card">
+          <div class="stat-header">
+            <span class="stat-number">80%</span>
+            <span class="stat-label">Infrastructure Gaps</span>
+          </div>
+          <p class="stat-desc">
+            Over 80% of urban security incidents occur in identified "dark spots"—desolate pathways, areas with broken streetlights, or blind corners. Standard navigation systems route solely on the shortest distance, ignoring these factors.
+          </p>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="glass-card stat-card">
+          <div class="stat-header">
+            <span class="stat-number">5-15m</span>
+            <span class="stat-label">Response Lag</span>
+          </div>
+          <p class="stat-desc">
+            Manually dialling contacts or writing alert messages under distress causes delay. Standard GPS sharing is low-accuracy, causing emergency responders to waste precious minutes attempting to pin down the coordinate.
+          </p>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="glass-card stat-card">
+          <div class="stat-header">
+            <span class="stat-number">30.8%</span>
+            <span class="stat-label">NCRB Crime Stats</span>
+          </div>
+          <p class="stat-desc">
+            National statistics reveal crimes against women are rising, especially in transit environments. A lack of immediate local community awareness means bystanders remain unaware of ongoing incidents next to them.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column: How SafeSphere Tackles These Gaps -->
+      <div class="about-column solution-column">
+        <div class="column-header">
+          <i data-lucide="shield-check" class="icon-success"></i>
+          <h3>The Solution: How SafeSphere Gaps the Gaps</h3>
+        </div>
+        <p class="section-intro-text">
+          SafeSphere implements a real-time, hardware-emulated glassmorphic panel offering immediate defense, telemetry synchronization, and crowdsourced hazard tracking.
+        </p>
+
+        <!-- Solution Card 1 -->
+        <div class="glass-card solution-detail-card">
+          <div class="sol-card-title">
+            <i data-lucide="navigation"></i>
+            <h4>Intelligent Infrastructure-Aware Routing</h4>
+          </div>
+          <p>
+            SafeSphere bypasses hazardous locations (like desolated paths or construction zones) by routing users exclusively through designated "Safe Havens" (staffed security checkpoints, lit lobbies, and library entrances).
+          </p>
+        </div>
+
+        <!-- Solution Card 2 -->
+        <div class="glass-card solution-detail-card">
+          <div class="sol-card-title">
+            <i data-lucide="volume-2"></i>
+            <h4>Local Acoustic Siren Deterrents</h4>
+          </div>
+          <p>
+            An instant high-decibel local acoustic synthesizer immediately draws bystander attention, alarming nearby guardians while creating a deterrent for any approaching threat.
+          </p>
+        </div>
+
+        <!-- Solution Card 3 -->
+        <div class="glass-card solution-detail-card">
+          <div class="sol-card-title">
+            <i data-lucide="shake"></i>
+            <h4>Gesture-Activated Silent Escapes</h4>
+          </div>
+          <p>
+            In tense situations, shaking the device triggers an authentic simulated phone call. This gives the user a social mechanism to walk away safely without escalating tension.
+          </p>
+        </div>
+
+        <!-- Solution Card 4 -->
+        <div class="glass-card solution-detail-card">
+          <div class="sol-card-title">
+            <i data-lucide="alert-octagon"></i>
+            <h4>Crowdsourced Hazard Mapping</h4>
+          </div>
+          <p>
+            Commuters can anonymously flag safety hazards like broken streetlights or suspicious activities in real-time, feeding a localized crowd safety map to guide future safe route calculations.
+          </p>
+        </div>
+
+        <!-- Solution Card 5 -->
+        <div class="glass-card solution-detail-card">
+          <div class="sol-card-title">
+            <i data-lucide="cloud-lightning"></i>
+            <h4>Offline Resiliency: Local Telemetry Queue</h4>
+          </div>
+          <p>
+            If internet connection is lost, telemetry coordinates are queued locally via SQLite/LocalStorage and automatically synchronized once network coverage resumes.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAFETY DISCLAIMER FOOTER -->
+  <footer class="dashboard-footer">
+    <div class="footer-container">
+      <div class="disclaimer-badge">
+        <i data-lucide="scale"></i>
+        <span>Legal Disclaimer</span>
+      </div>
+      <p class="disclaimer-text">
+        <strong>IMPORTANT SAFETY NOTICE:</strong> Shakthi SafeSphere is a prototype safety assistance platform designed for hackathon demonstrations. It does NOT replace professional emergency services, police dispatch, or direct contact with law enforcement. The SOS trigger, simulated siren, fake call screen, and telemetry logs are virtual mock features. In case of real emergencies, immediately dial the local authorities (e.g. 112 / 100 / 1091).
+      </p>
+      <div class="footer-meta">
+        <span>© 2026 Shakthi TechFusion. All rights reserved.</span>
+        <span class="pulse-indicator"><span class="dot"></span> Platform Demo Active</span>
+      </div>
+    </div>
+  </footer>
 
   <!-- OVERLAYS -->
   
