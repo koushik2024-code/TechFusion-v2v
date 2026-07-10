@@ -52,10 +52,13 @@ body {
   display: flex;
   flex-direction: column;
   background-image:
-    radial-gradient(ellipse at var(--mouse-x) var(--mouse-y), hsla(190, 90%, 50%, 0.06) 0%, transparent 55%),
-    radial-gradient(circle at 10% 20%, hsla(348, 60%, 25%, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 90% 80%, hsla(190, 60%, 20%, 0.15) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, hsla(222, 30%, 8%, 1) 0%, var(--bg-dark) 100%);
+    radial-gradient(hsla(190, 90%, 50%, 0.08) 1.2px, transparent 1.2px),
+    radial-gradient(hsla(270, 90%, 50%, 0.05) 1.8px, transparent 1.8px),
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), hsla(190, 90%, 50%, 0.04) 0%, transparent 60%),
+    radial-gradient(circle at 15% 15%, hsla(348, 60%, 25%, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, hsla(270, 70%, 25%, 0.12) 0%, transparent 45%),
+    linear-gradient(135deg, hsl(222, 24%, 6%) 0%, hsl(222, 28%, 3%) 100%);
+  background-size: 30px 30px, 60px 60px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
 }
 
@@ -75,7 +78,7 @@ body {
   height: 600px;
   top: -150px;
   left: -150px;
-  background: radial-gradient(circle, hsla(348, 100%, 55%, 0.18) 0%, transparent 70%);
+  background: radial-gradient(circle, hsla(348, 100%, 55%, 0.14) 0%, transparent 70%);
   animation: orb-float-1 18s ease-in-out infinite alternate;
 }
 
@@ -84,7 +87,7 @@ body {
   height: 500px;
   bottom: -100px;
   right: -100px;
-  background: radial-gradient(circle, hsla(190, 90%, 50%, 0.16) 0%, transparent 70%);
+  background: radial-gradient(circle, hsla(190, 90%, 50%, 0.14) 0%, transparent 70%);
   animation: orb-float-2 22s ease-in-out infinite alternate;
 }
 
@@ -93,7 +96,7 @@ body {
   height: 400px;
   top: 45%;
   left: 40%;
-  background: radial-gradient(circle, hsla(140, 71%, 45%, 0.10) 0%, transparent 70%);
+  background: radial-gradient(circle, hsla(270, 90%, 60%, 0.08) 0%, transparent 70%);
   animation: orb-float-3 15s ease-in-out infinite alternate;
 }
 
