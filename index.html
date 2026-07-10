@@ -14,9 +14,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Leaflet CSS for Dark Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Font Awesome 6 - CSS-based icons, always reliable -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
   <!-- Custom CSS (Cache Busted) -->
-  <link rel="stylesheet" href="styles.css?v=1.0.6">
-  <link rel="stylesheet" href="design-map-overlay.css?v=1.0.6">
+  <link rel="stylesheet" href="styles.css?v=1.0.7">
+  <link rel="stylesheet" href="design-map-overlay.css?v=1.0.7">
 </head>
 <body>
   <!-- Header Bar -->
@@ -78,7 +80,7 @@
         <!-- Alarm Siren Widget -->
         <div class="glass-card action-card" id="widget-siren">
           <div class="action-icon siren">
-            <i data-lucide="volume-2"></i>
+            <i class="fa-solid fa-bullhorn"></i>
           </div>
           <div class="action-info">
             <h3>Siren Alarm</h3>
@@ -92,7 +94,7 @@
         <!-- Fake Call Widget -->
         <div class="glass-card action-card" id="widget-fakecall">
           <div class="action-icon fakecall">
-            <i data-lucide="phone-call"></i>
+            <i class="fa-solid fa-phone-volume"></i>
           </div>
           <div class="action-info">
             <h3>Fake Call</h3>
@@ -104,14 +106,14 @@
           </button>
           <!-- Trigger Instantly -->
           <button class="action-trigger-btn" id="trigger-fakecall" title="Simulate Call Instantly">
-            <i data-lucide="chevron-right"></i>
+            <i class="fa-solid fa-play"></i>
           </button>
         </div>
 
         <!-- Audio Recording Widget -->
         <div class="glass-card action-card" id="widget-recorder">
           <div class="action-icon recorder">
-            <i data-lucide="mic"></i>
+            <i class="fa-solid fa-microphone"></i>
           </div>
           <div class="action-info">
             <h3>Audio Vault</h3>
@@ -429,7 +431,7 @@
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Custom Application Scripts (Cache Busted) -->
-  <script src="app.js?v=1.0.6"></script>
-  <script src="map.js?v=1.0.6"></script>
+  <script src="app.js?v=1.0.7"></script>
+  <script src="map.js?v=1.0.7"></script>
 </body>
 </html>

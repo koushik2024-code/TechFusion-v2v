@@ -719,9 +719,15 @@ body {
   border: 1px solid transparent;
 }
 
-/* Fix: size ALL SVG icons inside action-icon */
-.action-icon svg,
+/* Fix: size Font Awesome icons inside action-icon */
 .action-icon i {
+  font-size: 18px !important;
+  line-height: 1;
+  display: block;
+  text-align: center;
+}
+/* Keep SVG fallback sizing too */
+.action-icon svg {
   width: 22px !important;
   height: 22px !important;
   stroke-width: 2;
@@ -840,9 +846,14 @@ body {
   transform: scale(0.94);
 }
 
-/* Fix: chevron-right SVG inside trigger button */
-.action-trigger-btn svg,
+/* Fix: Font Awesome icon inside trigger button */
 .action-trigger-btn i {
+  font-size: 12px !important;
+  line-height: 1;
+  display: block;
+}
+/* SVG fallback */
+.action-trigger-btn svg {
   width: 18px !important;
   height: 18px !important;
   stroke-width: 2.5;
