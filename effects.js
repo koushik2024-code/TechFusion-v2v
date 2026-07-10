@@ -197,37 +197,8 @@
   });
   document.body.appendChild(spotlight);
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     3. 3D CARD TILT ON HOVER
-  ══════════════════════════════════════════════════════════════════════════ */
-  const TILT_MAX = 7;
+  /* 3D CARD TILT DISABLED */
 
-  function applyTilt(card) {
-    if (card._tiltApplied) return;
-    card._tiltApplied = true;
-
-    card.addEventListener('mousemove', (e) => {
-      const r  = card.getBoundingClientRect();
-      const dx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
-      const dy = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
-      card.style.transform   = `perspective(900px) rotateX(${(-dy * TILT_MAX).toFixed(2)}deg) rotateY(${(dx * TILT_MAX).toFixed(2)}deg) scale3d(1.018,1.018,1.018)`;
-      card.style.boxShadow   = `${-dx * 12}px ${dy * 12}px 36px hsla(190,90%,50%,0.13), 0 24px 60px rgba(0,0,0,0.5)`;
-      card.style.transition  = 'box-shadow 0.15s';
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.transform  = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
-      card.style.boxShadow  = '';
-      card.style.transition = 'transform 0.55s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.55s';
-    });
-
-    card.style.willChange     = 'transform';
-    card.style.transformStyle = 'preserve-3d';
-  }
-
-  function initTilt() {
-    document.querySelectorAll('.glass-card').forEach(applyTilt);
-  }
 
   /* ══════════════════════════════════════════════════════════════════════════
      4. FLOATING PARTICLE CANVAS
@@ -310,16 +281,7 @@
     });
   });
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     INIT
-  ══════════════════════════════════════════════════════════════════════════ */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTilt);
-  } else {
-    initTilt();
-  }
-
-  // Re-apply tilt when new cards are injected dynamically
-  new MutationObserver(initTilt).observe(document.body, { childList: true, subtree: true });
+  /* INIT */
+  // Tilt removed per user request.
 
 })();
