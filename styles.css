@@ -130,7 +130,6 @@ body {
   transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.4s;
   will-change: transform;
 }
-}
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
@@ -2178,7 +2177,6 @@ body {
   height: 14px;
 }
 
-<<<<<<< HEAD
 /* ==========================================================================
    ABOUT & IMPACT PAGE STYLES
    ========================================================================== */
