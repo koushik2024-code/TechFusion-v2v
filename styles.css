@@ -1836,6 +1836,20 @@ body {
 
 /* 9. Responsive Breakpoints */
 @media (max-width: 1100px) {
+  .dashboard-header {
+    height: auto;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 20px;
+    align-items: center;
+    text-align: center;
+  }
+  .header-stats {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .dashboard-container {
     grid-template-columns: 300px 1fr;
     height: auto;
