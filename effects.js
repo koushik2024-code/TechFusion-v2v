@@ -383,6 +383,11 @@
         chartCtx.stroke();
       }
 
+      // Draw real-time value text overlay
+      chartCtx.font = '8px monospace';
+      chartCtx.fillStyle = 'rgba(6, 182, 212, 0.75)';
+      chartCtx.fillText(`TELEMETRY: ${Math.round(currentVal)} KM/H`, w - 105, 12);
+
       if (dataPoints.length > 1) {
         // Draw Fill Gradient
         chartCtx.beginPath();
