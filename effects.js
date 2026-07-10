@@ -1,198 +1,325 @@
 /* ==========================================================================
-   SHAKTHI SAFESPHERE - ADVANCED UI EFFECTS
-   Mouse tracking, cursor spotlight, 3D card tilt, particle trails
+   SHAKTHI SAFESPHERE - ADVANCED UI EFFECTS v3.0
+   Custom circle cursor, mouse tracking, 3D card tilt, floating particles
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  /* ── 1. CSS VARIABLE MOUSE TRACKER ─────────────────────────────────────── */
-  // Updates --mouse-x / --mouse-y so CSS can react to cursor position
-  let mouseX = 0, mouseY = 0;
-  let targetX = 0, targetY = 0;
+  /* ══════════════════════════════════════════════════════════════════════════
+     1. CUSTOM CIRCLE CURSOR
+     - Small dot follows mouse exactly
+     - Large ring follows with elastic lag
+     - Morphs color + size on hover over interactive elements
+  ══════════════════════════════════════════════════════════════════════════ */
+
+  // Hide default cursor everywhere
+  const cursorStyle = document.createElement('style');
+  cursorStyle.textContent = `
+    *, *::before, *::after { cursor: none !important; }
+  `;
+  document.head.appendChild(cursorStyle);
+
+  // Create cursor dot (exact position)
+  const dot = document.createElement('div');
+  dot.id = 'cursor-dot';
+  Object.assign(dot.style, {
+    position:        'fixed',
+    top:             '0',
+    left:            '0',
+    width:           '8px',
+    height:          '8px',
+    borderRadius:    '50%',
+    background:      'hsl(190, 90%, 65%)',
+    boxShadow:       '0 0 10px hsl(190, 90%, 65%), 0 0 20px hsla(190,90%,65%,0.5)',
+    pointerEvents:   'none',
+    zIndex:          '99999',
+    transform:       'translate(-50%, -50%)',
+    transition:      'width 0.2s, height 0.2s, background 0.2s, box-shadow 0.2s',
+    willChange:      'transform',
+  });
+
+  // Create cursor ring (lags behind with elastic motion)
+  const ring = document.createElement('div');
+  ring.id = 'cursor-ring';
+  Object.assign(ring.style, {
+    position:        'fixed',
+    top:             '0',
+    left:            '0',
+    width:           '40px',
+    height:          '40px',
+    borderRadius:    '50%',
+    border:          '1.5px solid hsla(190, 90%, 65%, 0.7)',
+    boxShadow:       '0 0 12px hsla(190,90%,65%,0.25), inset 0 0 8px hsla(190,90%,65%,0.08)',
+    background:      'hsla(190, 90%, 65%, 0.04)',
+    pointerEvents:   'none',
+    zIndex:          '99998',
+    transform:       'translate(-50%, -50%)',
+    transition:      'width 0.35s cubic-bezier(0.25,0.8,0.25,1), height 0.35s cubic-bezier(0.25,0.8,0.25,1), border-color 0.3s, box-shadow 0.3s, background 0.3s',
+    willChange:      'transform',
+    backdropFilter:  'blur(1px)',
+  });
+
+  document.body.appendChild(dot);
+  document.body.appendChild(ring);
+
+  // Track exact cursor position
+  let dotX = 0, dotY = 0;
+  let ringX = window.innerWidth / 2, ringY = window.innerHeight / 2;
+  let isHovering = false;
+  let isClicking = false;
 
   document.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX / window.innerWidth)  * 100;
-    mouseY = (e.clientY / window.innerHeight) * 100;
-    document.documentElement.style.setProperty('--mouse-x', mouseX.toFixed(2) + '%');
-    document.documentElement.style.setProperty('--mouse-y', mouseY.toFixed(2) + '%');
+    dotX = e.clientX;
+    dotY = e.clientY;
 
-    // Move cursor spotlight
+    // Dot snaps immediately
+    dot.style.left = dotX + 'px';
+    dot.style.top  = dotY + 'px';
+
+    // Update mouse-x/y CSS vars for background
+    document.documentElement.style.setProperty('--mouse-x', (e.clientX / window.innerWidth * 100).toFixed(2) + '%');
+    document.documentElement.style.setProperty('--mouse-y', (e.clientY / window.innerHeight * 100).toFixed(2) + '%');
+
+    // Move spotlight
     spotlight.style.left = e.clientX + 'px';
     spotlight.style.top  = e.clientY + 'px';
   });
 
-  /* ── 2. CURSOR SPOTLIGHT ────────────────────────────────────────────────── */
+  // Elastic ring animation loop
+  function animateRing() {
+    // Lerp ring toward dot position
+    const ease = isHovering ? 0.10 : 0.14;
+    ringX += (dotX - ringX) * ease;
+    ringY += (dotY - ringY) * ease;
+
+    ring.style.left = ringX + 'px';
+    ring.style.top  = ringY + 'px';
+
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  // ── Hover state detection ─────────────────────────────────────────────────
+  const INTERACTIVE = 'a, button, input, select, textarea, label, [role="button"], .glass-card, .action-icon, .action-trigger-btn, .action-toggle-btn, .hazard-opt, .contact-card';
+
+  function setCursorState(type) {
+    if (type === 'hover-btn') {
+      // Crimson ring for buttons
+      ring.style.width          = '52px';
+      ring.style.height         = '52px';
+      ring.style.borderColor    = 'hsla(348, 100%, 65%, 0.85)';
+      ring.style.boxShadow      = '0 0 18px hsla(348,100%,65%,0.35), inset 0 0 10px hsla(348,100%,65%,0.08)';
+      ring.style.background     = 'hsla(348, 100%, 65%, 0.06)';
+      dot.style.width           = '5px';
+      dot.style.height          = '5px';
+      dot.style.background      = 'hsl(348, 100%, 70%)';
+      dot.style.boxShadow       = '0 0 10px hsl(348,100%,70%), 0 0 24px hsla(348,100%,70%,0.5)';
+    } else if (type === 'hover-card') {
+      // Cyan ring for cards
+      ring.style.width          = '64px';
+      ring.style.height         = '64px';
+      ring.style.borderColor    = 'hsla(190, 90%, 60%, 0.7)';
+      ring.style.boxShadow      = '0 0 22px hsla(190,90%,60%,0.3), inset 0 0 12px hsla(190,90%,60%,0.06)';
+      ring.style.background     = 'hsla(190, 90%, 60%, 0.04)';
+      dot.style.width           = '5px';
+      dot.style.height          = '5px';
+      dot.style.background      = 'hsl(190, 90%, 70%)';
+      dot.style.boxShadow       = '0 0 10px hsl(190,90%,70%), 0 0 20px hsla(190,90%,70%,0.4)';
+    } else {
+      // Default cyan
+      ring.style.width          = '40px';
+      ring.style.height         = '40px';
+      ring.style.borderColor    = 'hsla(190, 90%, 65%, 0.7)';
+      ring.style.boxShadow      = '0 0 12px hsla(190,90%,65%,0.25), inset 0 0 8px hsla(190,90%,65%,0.08)';
+      ring.style.background     = 'hsla(190, 90%, 65%, 0.04)';
+      dot.style.width           = '8px';
+      dot.style.height          = '8px';
+      dot.style.background      = 'hsl(190, 90%, 65%)';
+      dot.style.boxShadow       = '0 0 10px hsl(190, 90%, 65%), 0 0 20px hsla(190,90%,65%,0.5)';
+    }
+  }
+
+  document.addEventListener('mouseover', (e) => {
+    const target = e.target.closest(INTERACTIVE);
+    if (!target) { setCursorState('default'); isHovering = false; return; }
+    isHovering = true;
+    if (target.matches('button, a, .action-trigger-btn, .action-toggle-btn, .hazard-opt')) {
+      setCursorState('hover-btn');
+    } else {
+      setCursorState('hover-card');
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    if (!e.relatedTarget || !e.relatedTarget.closest(INTERACTIVE)) {
+      setCursorState('default');
+      isHovering = false;
+    }
+  });
+
+  // Click pulse effect
+  document.addEventListener('mousedown', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(0.78)';
+    dot.style.transform  = 'translate(-50%, -50%) scale(0.6)';
+  });
+  document.addEventListener('mouseup', () => {
+    ring.style.transform = 'translate(-50%, -50%) scale(1)';
+    dot.style.transform  = 'translate(-50%, -50%) scale(1)';
+  });
+
+  // Hide cursors when mouse leaves window
+  document.addEventListener('mouseleave', () => {
+    dot.style.opacity  = '0';
+    ring.style.opacity = '0';
+  });
+  document.addEventListener('mouseenter', () => {
+    dot.style.opacity  = '1';
+    ring.style.opacity = '1';
+  });
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     2. CURSOR SPOTLIGHT (soft ambient glow behind ring)
+  ══════════════════════════════════════════════════════════════════════════ */
   const spotlight = document.createElement('div');
   spotlight.id = 'cursor-spotlight';
-  spotlight.style.cssText = `
-    position: fixed;
-    pointer-events: none;
-    z-index: 9999;
-    width: 380px;
-    height: 380px;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle,
-      hsla(190, 90%, 50%, 0.07) 0%,
-      hsla(348, 100%, 61%, 0.04) 40%,
-      transparent 70%
-    );
-    transition: left 0.08s ease-out, top 0.08s ease-out;
-    mix-blend-mode: screen;
-  `;
+  Object.assign(spotlight.style, {
+    position:      'fixed',
+    pointerEvents: 'none',
+    zIndex:        '9990',
+    width:         '420px',
+    height:        '420px',
+    borderRadius:  '50%',
+    transform:     'translate(-50%, -50%)',
+    background:    'radial-gradient(circle, hsla(190,90%,50%,0.07) 0%, hsla(348,100%,61%,0.04) 45%, transparent 72%)',
+    transition:    'left 0.1s ease-out, top 0.1s ease-out',
+    mixBlendMode:  'screen',
+  });
   document.body.appendChild(spotlight);
 
-  /* ── 3. 3D CARD TILT ON HOVER ───────────────────────────────────────────── */
-  const TILT_INTENSITY = 8; // degrees max
+  /* ══════════════════════════════════════════════════════════════════════════
+     3. 3D CARD TILT ON HOVER
+  ══════════════════════════════════════════════════════════════════════════ */
+  const TILT_MAX = 7;
 
   function applyTilt(card) {
+    if (card._tiltApplied) return;
+    card._tiltApplied = true;
+
     card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const cx = rect.left + rect.width  / 2;
-      const cy = rect.top  + rect.height / 2;
-      const dx = (e.clientX - cx) / (rect.width  / 2);
-      const dy = (e.clientY - cy) / (rect.height / 2);
-
-      const rotateY =  dx * TILT_INTENSITY;
-      const rotateX = -dy * TILT_INTENSITY;
-
-      card.style.transform    = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
-      card.style.transition   = 'box-shadow 0.2s';
-      card.style.boxShadow    = `
-        ${-rotateY * 1.5}px ${rotateX * 1.5}px 30px hsla(190,90%,50%,0.12),
-        0 20px 60px rgba(0,0,0,0.4)
-      `;
+      const r  = card.getBoundingClientRect();
+      const dx = (e.clientX - r.left  - r.width  / 2) / (r.width  / 2);
+      const dy = (e.clientY - r.top   - r.height / 2) / (r.height / 2);
+      card.style.transform   = `perspective(900px) rotateX(${(-dy * TILT_MAX).toFixed(2)}deg) rotateY(${(dx * TILT_MAX).toFixed(2)}deg) scale3d(1.018,1.018,1.018)`;
+      card.style.boxShadow   = `${-dx * 12}px ${dy * 12}px 36px hsla(190,90%,50%,0.13), 0 24px 60px rgba(0,0,0,0.5)`;
+      card.style.transition  = 'box-shadow 0.15s';
     });
 
     card.addEventListener('mouseleave', () => {
-      card.style.transform  = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
-      card.style.transition = 'transform 0.5s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.5s';
+      card.style.transform  = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
       card.style.boxShadow  = '';
+      card.style.transition = 'transform 0.55s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.55s';
     });
 
-    card.style.willChange        = 'transform';
-    card.style.transformStyle    = 'preserve-3d';
-    card.style.transitionTimingFunction = 'cubic-bezier(0.25,0.8,0.25,1)';
+    card.style.willChange     = 'transform';
+    card.style.transformStyle = 'preserve-3d';
   }
 
-  // Apply tilt to all glass cards
   function initTilt() {
     document.querySelectorAll('.glass-card').forEach(applyTilt);
   }
 
-  /* ── 4. FLOATING PARTICLE CANVAS BACKGROUND ─────────────────────────────── */
-  const canvas  = document.createElement('canvas');
-  canvas.id     = 'bg-particles';
-  canvas.style.cssText = `
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.5;
-  `;
+  /* ══════════════════════════════════════════════════════════════════════════
+     4. FLOATING PARTICLE CANVAS
+  ══════════════════════════════════════════════════════════════════════════ */
+  const canvas = document.createElement('canvas');
+  canvas.id    = 'bg-particles';
+  Object.assign(canvas.style, {
+    position:      'fixed',
+    inset:         '0',
+    width:         '100%',
+    height:        '100%',
+    pointerEvents: 'none',
+    zIndex:        '0',
+    opacity:       '0.55',
+  });
   document.body.insertBefore(canvas, document.body.firstChild);
+  const ctx = canvas.getContext('2d');
 
-  const ctx    = canvas.getContext('2d');
   const COLORS = [
-    'hsla(190, 90%, 60%, ',   // cyan
-    'hsla(348, 100%, 65%, ',  // crimson
-    'hsla(140, 71%, 55%, ',   // emerald
-    'hsla(48, 100%, 65%, ',   // amber
+    'hsla(190, 90%, 65%, ', 'hsla(348, 100%, 65%, ',
+    'hsla(140, 71%, 55%, ', 'hsla(48,  100%, 65%, ',
   ];
 
-  let particles = [];
-  const PARTICLE_COUNT = 55;
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   resize();
   window.addEventListener('resize', resize);
 
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
   class Particle {
     constructor() { this.reset(true); }
-
     reset(init = false) {
-      this.x     = Math.random() * canvas.width;
-      this.y     = init ? Math.random() * canvas.height : canvas.height + 10;
-      this.vx    = (Math.random() - 0.5) * 0.3;
-      this.vy    = -(Math.random() * 0.4 + 0.15);
-      this.r     = Math.random() * 2.2 + 0.6;
-      this.alpha = Math.random() * 0.5 + 0.1;
-      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      this.pulse = Math.random() * Math.PI * 2;
-      this.life  = 0;
-      this.maxLife = Math.random() * 300 + 200;
+      this.x    = Math.random() * canvas.width;
+      this.y    = init ? Math.random() * canvas.height : canvas.height + 10;
+      this.vx   = (Math.random() - 0.5) * 0.3;
+      this.vy   = -(Math.random() * 0.45 + 0.1);
+      this.r    = Math.random() * 2 + 0.5;
+      this.a    = Math.random() * 0.45 + 0.08;
+      this.col  = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.ph   = Math.random() * Math.PI * 2;
+      this.life = 0;
+      this.max  = Math.random() * 280 + 180;
     }
-
-    update(mx, my) {
-      // Gentle drift toward cursor
-      const dx = mx - this.x;
-      const dy = my - this.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 200) {
-        this.vx += (dx / dist) * 0.008;
-        this.vy += (dy / dist) * 0.008;
-      }
-
-      this.vx *= 0.98;
-      this.vy *= 0.98;
-      this.x  += this.vx;
-      this.y  += this.vy;
-      this.pulse += 0.03;
-      this.life++;
-
-      if (this.life > this.maxLife || this.y < -20) this.reset();
+    update() {
+      const dx = mx - this.x, dy = my - this.y;
+      const d  = Math.sqrt(dx * dx + dy * dy);
+      if (d < 180) { this.vx += (dx / d) * 0.009; this.vy += (dy / d) * 0.009; }
+      this.vx *= 0.979; this.vy *= 0.979;
+      this.x  += this.vx; this.y  += this.vy;
+      this.ph += 0.03; this.life++;
+      if (this.life > this.max || this.y < -20) this.reset();
     }
-
     draw() {
-      const pulsedAlpha = this.alpha * (0.7 + 0.3 * Math.sin(this.pulse));
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-      ctx.fillStyle = this.color + pulsedAlpha + ')';
+      ctx.fillStyle = this.col + (this.a * (0.65 + 0.35 * Math.sin(this.ph))) + ')';
       ctx.fill();
     }
   }
 
-  for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
-
-  let animMx = window.innerWidth  / 2;
-  let animMy = window.innerHeight / 2;
-
-  document.addEventListener('mousemove', (e) => {
-    animMx = e.clientX;
-    animMy = e.clientY;
-  });
+  const particles = Array.from({ length: 60 }, () => new Particle());
 
   function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(p => { p.update(animMx, animMy); p.draw(); });
+    particles.forEach(p => { p.update(); p.draw(); });
     requestAnimationFrame(animateParticles);
   }
   animateParticles();
 
-  /* ── 5. BACKGROUND ORB PARALLAX ─────────────────────────────────────────── */
-  const orbs = document.querySelectorAll('.bg-orb');
+  /* ══════════════════════════════════════════════════════════════════════════
+     5. ORB PARALLAX ON MOUSE MOVE
+  ══════════════════════════════════════════════════════════════════════════ */
   document.addEventListener('mousemove', (e) => {
     const nx = (e.clientX / window.innerWidth  - 0.5);
     const ny = (e.clientY / window.innerHeight - 0.5);
-    orbs.forEach((orb, i) => {
-      const depth = (i + 1) * 18;
-      orb.style.transform = `translate(${nx * depth}px, ${ny * depth}px)`;
+    document.querySelectorAll('.bg-orb').forEach((orb, i) => {
+      const d = (i + 1) * 22;
+      orb.style.transform = `translate(${nx * d}px, ${ny * d}px)`;
     });
   });
 
-  /* ── INIT ───────────────────────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => {
+  /* ══════════════════════════════════════════════════════════════════════════
+     INIT
+  ══════════════════════════════════════════════════════════════════════════ */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTilt);
+  } else {
     initTilt();
-  });
+  }
 
-  // Re-apply tilt when new cards appear (dynamic content)
-  const observer = new MutationObserver(() => initTilt());
-  observer.observe(document.body, { childList: true, subtree: true });
+  // Re-apply tilt when new cards are injected dynamically
+  new MutationObserver(initTilt).observe(document.body, { childList: true, subtree: true });
 
 })();
