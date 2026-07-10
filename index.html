@@ -17,8 +17,8 @@
   <!-- Font Awesome 6 - CSS-based icons, always reliable -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
   <!-- Custom CSS (Cache Busted) -->
-  <link rel="stylesheet" href="styles.css?v=1.0.8">
-  <link rel="stylesheet" href="design-map-overlay.css?v=1.0.8">
+  <link rel="stylesheet" href="styles.css?v=1.0.9">
+  <link rel="stylesheet" href="design-map-overlay.css?v=1.0.9">
 </head>
 <body>
   <!-- Header Bar -->
@@ -86,9 +86,11 @@
             <h3>Siren Alarm</h3>
             <p id="siren-status-text">Inactive</p>
           </div>
-          <button class="action-toggle-btn" id="toggle-siren">
-            <span class="toggle-slider"></span>
-          </button>
+          <div class="action-controls">
+            <button class="action-toggle-btn" id="toggle-siren">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
         </div>
 
         <!-- Fake Call Widget -->
@@ -98,16 +100,16 @@
           </div>
           <div class="action-info">
             <h3>Fake Call</h3>
-            <p id="shake-status-text">Shake to Trigger: OFF</p>
+            <p id="shake-status-text">Shake: OFF</p>
           </div>
-          <!-- Toggle Shake Call Switch -->
-          <button class="action-toggle-btn" id="toggle-shake-call" title="Enable Shake to Activate Fake Call">
-            <span class="toggle-slider"></span>
-          </button>
-          <!-- Trigger Instantly -->
-          <button class="action-trigger-btn" id="trigger-fakecall" title="Simulate Call Instantly">
-            <i class="fa-solid fa-play"></i>
-          </button>
+          <div class="action-controls">
+            <button class="action-toggle-btn" id="toggle-shake-call" title="Shake to Activate">
+              <span class="toggle-slider"></span>
+            </button>
+            <button class="action-trigger-btn" id="trigger-fakecall" title="Trigger Call Now">
+              <i class="fa-solid fa-play"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Audio Recording Widget -->
@@ -119,9 +121,11 @@
             <h3>Audio Vault</h3>
             <p id="record-status-text">Ready</p>
           </div>
-          <button class="action-trigger-btn" id="trigger-record">
-            <span class="record-dot"></span>
-          </button>
+          <div class="action-controls">
+            <button class="action-trigger-btn" id="trigger-record" title="Start Recording">
+              <span class="record-dot"></span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -431,7 +435,7 @@
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Custom Application Scripts (Cache Busted) -->
-  <script src="app.js?v=1.0.8"></script>
-  <script src="map.js?v=1.0.8"></script>
+  <script src="app.js?v=1.0.9"></script>
+  <script src="map.js?v=1.0.9"></script>
 </body>
 </html>

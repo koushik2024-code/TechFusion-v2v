@@ -697,21 +697,43 @@ body {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  gap: 14px;
+  gap: 12px;
   border-radius: 14px;
-  transition: background var(--transition-fast), transform 0.15s;
+  background: hsla(220, 25%, 12%, 0.6);
+  border: 1px solid hsla(0, 0%, 100%, 0.06);
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
   cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, hsla(0,0%,100%,0.03), transparent);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .action-card:hover {
-  background: hsla(0, 0%, 100%, 0.04);
+  background: hsla(220, 25%, 16%, 0.7);
+  border-color: hsla(0, 0%, 100%, 0.12);
+}
+
+/* Right-side controls wrapper */
+.action-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Icon box */
 .action-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -794,74 +816,89 @@ body {
 
 /* Toggle switch */
 .action-toggle-btn {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
   background: hsla(0, 0%, 100%, 0.08);
-  border: 1px solid var(--border-glass);
+  border: 1px solid hsla(0, 0%, 100%, 0.12);
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.25s, border-color 0.25s;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .action-toggle-btn.active {
-  background: var(--color-crimson);
-  border-color: var(--color-crimson);
+  background: linear-gradient(135deg, hsl(348, 100%, 55%), hsl(348, 90%, 45%));
+  border-color: hsl(348, 100%, 55%);
+  box-shadow: 0 0 14px hsla(348, 100%, 61%, 0.4);
 }
 
 .toggle-slider {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .action-toggle-btn.active .toggle-slider {
   transform: translateX(20px);
 }
 
-/* Trigger arrow button */
+/* Trigger play/record button - colored per widget type */
 .action-trigger-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: hsla(0, 0%, 100%, 0.08);
-  border: 1px solid var(--border-glass);
-  color: var(--text-primary);
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.25), hsla(140, 71%, 48%, 0.1));
+  border: 1px solid hsla(140, 71%, 48%, 0.4);
+  color: hsl(140, 71%, 62%);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 0 10px hsla(140, 71%, 48%, 0.15);
+}
+
+/* Record button (red) */
+#trigger-record {
+  background: linear-gradient(135deg, hsla(348, 100%, 61%, 0.25), hsla(348, 100%, 61%, 0.1));
+  border-color: hsla(348, 100%, 61%, 0.45);
+  color: var(--color-crimson);
+  box-shadow: 0 0 10px hsla(348, 100%, 61%, 0.2);
 }
 
 .action-trigger-btn:hover {
-  background: hsla(0, 0%, 100%, 0.18);
-  transform: scale(1.08);
-  box-shadow: 0 0 10px rgba(255,255,255,0.1);
+  transform: scale(1.1);
+  box-shadow: 0 0 18px hsla(140, 71%, 48%, 0.35);
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.40), hsla(140, 71%, 48%, 0.2));
+}
+
+#trigger-record:hover {
+  box-shadow: 0 0 18px hsla(348, 100%, 61%, 0.4);
+  background: linear-gradient(135deg, hsla(348, 100%, 61%, 0.40), hsla(348, 100%, 61%, 0.2));
 }
 
 .action-trigger-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
-/* Fix: Font Awesome icon inside trigger button */
+/* Font Awesome icon inside trigger button */
 .action-trigger-btn i {
-  font-size: 12px !important;
+  font-size: 13px !important;
   line-height: 1;
   display: block;
 }
-/* SVG fallback */
+
 .action-trigger-btn svg {
-  width: 18px !important;
-  height: 18px !important;
+  width: 16px !important;
+  height: 16px !important;
   stroke-width: 2.5;
   display: block;
 }
@@ -869,16 +906,16 @@ body {
 /* Red record dot */
 .record-dot {
   display: block;
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  background-color: var(--color-crimson);
-  box-shadow: 0 0 8px rgba(255,56,96,0.6);
+  background: var(--color-crimson);
+  box-shadow: 0 0 10px rgba(255,56,96,0.7);
   transition: transform 0.2s;
 }
 
 .action-icon.recorder.recording + .action-info + .action-trigger-btn .record-dot {
-  transform: scale(1.3);
+  transform: scale(1.4);
   animation: pulse-active 1s infinite alternate;
 }
 
