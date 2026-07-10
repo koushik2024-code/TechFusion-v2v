@@ -1861,8 +1861,8 @@ body {
 
 .hazard-options {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   margin-top: 10px;
 }
 
@@ -1893,4 +1893,26 @@ body {
   width: 14px;
   height: 14px;
 }
+
+/* Lucide SVG Icons Compatibility Styles (Fixes invisible or shrunk icons) */
+.logo-icon-glow svg { width: 22px; height: 22px; }
+.git-checkin-tracker svg { width: 14px; height: 14px; }
+.connectivity-status svg { width: 14px; height: 14px; }
+.emergency-action-btn svg { width: 48px; height: 48px; stroke-width: 2.2; }
+.deactivate-sos-btn svg { width: 24px; height: 24px; }
+.route-btn svg { width: 14px; height: 14px; }
+.transit-step svg { width: 14px; height: 14px; }
+.progress-avatar svg { width: 12px; height: 12px; }
+.edit-btn svg { width: 16px; height: 16px; }
+.contact-avatar svg { width: 16px; height: 16px; }
+.call-icon-btn svg { width: 14px; height: 14px; }
+.security-badge svg { width: 12px; height: 12px; }
+.caller-avatar svg { width: 50px; height: 50px; }
+.call-btn svg { width: 28px; height: 28px; }
+.marker-pin svg { width: 14px; height: 14px; }
+.verification-label svg { width: 14px; height: 14px; }
+.im-safe-btn svg { width: 14px; height: 14px; }
+.report-hazard-btn svg { width: 14px; height: 14px; }
+.hazard-opt svg { width: 14px; height: 14px; }
+
 
