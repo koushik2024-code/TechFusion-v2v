@@ -1495,6 +1495,17 @@ body {
   color: var(--color-crimson);
 }
 
+.contact-avatar.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+  color: #25d366;
+}
+
+.contact-avatar i.fa-brands {
+  width: auto;
+  height: auto;
+  font-size: 15px;
+}
+
 .contact-details {
   flex: 1;
 }
@@ -1535,6 +1546,18 @@ body {
   background: var(--color-crimson);
   color: white;
   border-color: var(--color-crimson);
+}
+
+.call-icon-btn.whatsapp:hover {
+  background: #25d366;
+  color: white;
+  border-color: #25d366;
+}
+
+.call-icon-btn i.fa-brands {
+  width: auto;
+  height: auto;
+  font-size: 15px;
 }
 
 .call-icon-btn i {

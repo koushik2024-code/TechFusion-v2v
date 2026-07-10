@@ -19,7 +19,7 @@
   * *Fake Call Simulator & Shake Trigger*: An overlay simulating a realistic incoming phone call screen (avatar vibration, accept/decline triggers) to help users escape uncomfortable situations. Can be triggered instantly, or physically activated by shaking the device (enabled via toggle switch). Features a built-in keyboard shortcut (`S` key) to simulate shake on desktop setups.
   * *Audio Vault*: Visual micro-action simulating ambient audio capture with an animated sine-wave visualizer canvas that pulses when recording is active.
   * *Voice Guardian*: An interactive voice-activated SOS trigger using Web Speech API that listens for safety keywords (`help`, `sos`, `emergency`) to start the countdown. It also listens for `stop` or `cancel` during the countdown or an active emergency to stop the alarm and turn the listening loop OFF permanently.
-  * *Emergency Contacts Manager*: In-app editor overlay to customize primary and secondary guardian details.
+  * *Emergency Contacts Manager*: In-app editor overlay to customize primary and secondary guardian details. Features a quick-access WhatsApp integration to instantly **Connect with SHE Team** (+91 63048 54034) with pre-filled distress messages.
 * **Feature 2: Real-time passive location telemetry**
   * *Device Status Panel*: Interactive cards display signal strength, telemetry streaming status, and battery percentage (which drains slightly over time). Features a real-time glowing canvas line chart showing tracking speed and latency with a dynamic text readout (`TELEMETRY: XX KM/H`).
   * *Telemetry Uplink Log*: A scrolling terminal feed showing active timestamps, coordinate streams (centered around CBIT Hyderabad campus paths), walking speed, and battery health.
