@@ -281,13 +281,21 @@ window.mapModule = (function() {
         animationInterval = null;
         window.appState.speed = 0;
         
-        transitStatusText.textContent = `Arrived safely at destination!`;
-        transitETAText.textContent = `0 mins remaining`;
+        transitStatusText.textContent = `Arrived at destination! Verification pending.`;
+        transitETAText.textContent = `Check-in required`;
         progressFill.style.width = '100%';
         avatarIndicator.style.left = '100%';
         
-        updateSafetyAssessmentScore(100, "Destination Reached", "Inside verified safe zone. Guard active.");
-        window.logTelemetryFromMap("Arrived", `${endCoords[0].toFixed(6)}, ${endCoords[1].toFixed(6)}`, "0 km/h", `${window.appState.currentBattery}%`);
+        // Trigger verification countdown
+        if (typeof window.triggerArrivalVerification === 'function') {
+          window.triggerArrivalVerification(endCoords);
+        } else {
+          // Fallback if not initialized
+          transitStatusText.textContent = `Arrived safely at destination!`;
+          transitETAText.textContent = `0 mins remaining`;
+          updateSafetyAssessmentScore(100, "Destination Reached", "Inside verified safe zone. Guard active.");
+          window.logTelemetryFromMap("Arrived", `${endCoords[0].toFixed(6)}, ${endCoords[1].toFixed(6)}`, "0 km/h", `${window.appState.currentBattery}%`);
+        }
         return;
       }
 
@@ -404,11 +412,43 @@ window.mapModule = (function() {
     }
   }
 
+  function addCommunityHazard(lat, lng, type) {
+    if (!map) return;
+    
+    // Draw community red caution circle
+    L.circle([lat, lng], {
+      color: 'var(--color-crimson)',
+      fillColor: 'var(--color-crimson)',
+      fillOpacity: 0.15,
+      weight: 1,
+      dashArray: '4, 4',
+      radius: 70
+    }).addTo(map);
+
+    // Marker Icon
+    const marker = L.marker([lat, lng], { icon: createCautionIcon() }).addTo(map);
+    marker.bindPopup(`
+      <div style="font-family: 'Inter', sans-serif; min-width: 140px;">
+        <h4 style="color: var(--color-crimson); font-weight:700; margin-bottom:4px;">⚠️ Community Hazard</h4>
+        <p style="font-size:0.75rem; color:var(--text-secondary);">Anonymized: <b>${type}</b></p>
+        <span style="font-size:0.65rem; color:var(--text-muted); font-weight:500;">REPORTED: Just Now</span>
+      </div>
+    `).addTo(map).openPopup();
+    
+    // Pan map to center at reported hazard
+    map.setView([lat, lng], 17);
+    
+    // Refresh Lucide on newly created icons
+    lucide.createIcons();
+  }
+
   // Initializer window hook
   return {
     init: init,
     triggerEmergencyOnMap: triggerEmergencyOnMap,
-    clearEmergencyOnMap: clearEmergencyOnMap
+    clearEmergencyOnMap: clearEmergencyOnMap,
+    updateSafetyAssessmentScore: updateSafetyAssessmentScore,
+    addCommunityHazard: addCommunityHazard
   };
 })();
 

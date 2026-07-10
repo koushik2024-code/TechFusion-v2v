@@ -16,7 +16,7 @@
 * **Feature 1: Interactive, glassmorphic safety tracking widgets**
   * *SOS Countdown Trigger*: A press-and-hold circular SOS button with a 3-second visual countdown to prevent accidental activation.
   * *Web Audio Alarm Siren*: A programmatically synthesized dual-tone siren alarm (sweeping frequencies) that can be activated to draw immediate physical attention.
-  * *Fake Call Simulator*: An overlay simulating a realistic incoming phone call screen (avatar vibration, accept/decline triggers) to help users escape uncomfortable situations.
+  * *Fake Call Simulator & Shake Trigger*: An overlay simulating a realistic incoming phone call screen (avatar vibration, accept/decline triggers) to help users escape uncomfortable situations. Can be triggered instantly, or physically activated by shaking the device (enabled via toggle switch). Features a built-in keyboard shortcut (`S` key) to simulate shake on desktop setups.
   * *Audio Vault*: Visual micro-action simulating ambient audio capture and secure encryption/upload.
   * *Emergency Contacts Manager*: In-app editor overlay to customize primary and secondary guardian details.
 * **Feature 2: Real-time passive location telemetry**
@@ -75,4 +75,31 @@ Instead of requesting external MP3 files (which can lag, fail to load, or hit CO
 The routing simulation interpolates coordinate points along the selected walkway segments.
 * During the animation, a loop calculates the mathematical distance from the user marker to the centroid of each caution zone using the Haversine method (Leaflet's `.distanceTo()` function).
 * If the user enters a caution radius, the safety score (Safety Assessment Gauge) dynamically decreases (e.g., from 98% to 68%), changing the gauge outline color from green to yellow/red and warning the user to return to the illuminated path.
-* 
+
+#### 4. Offline-First Telemetry Sync & Local Buffering (Dead Zones)
+To handle situations where the user enters a cellular "dead zone" (disconnected/no internet access):
+* **Real-time Connection Detection**: The application utilizes standard browser connection APIs (`navigator.onLine` and window `online`/`offline` events) to monitor connectivity in real time.
+* **Visual Status Indicator**: When offline, the header dynamically updates to display a prominent warning indicator featuring a strike-through Cloud (`cloud-off`) icon and showing the count of queued telemetry records.
+* **Local Buffer Queuing**: If a telemetry point is recorded (either regular interval logging or SOS telemetry broadcast) while offline, the system intercepts the event, serializes the telemetry record, and queues it in the browser's `localStorage` (under the key `shakthi_telemetry_queue`). This guarantees data persistence even if the browser is closed, the tab is reloaded, or the device loses power.
+* **Local UI Feedback**: Telemetry entries captured offline are styled with a distinct yellow warning indicator and marked as `QUEUED` in the telemetry uplink logs.
+* **Auto-Recovery Background Sync**: When connection is restored (triggering the `online` event), a sync manager automatically reads the buffered entries from `localStorage`, batches them, simulates a secure background synchronization to the cloud server, and flushes the queue, returning the indicator status to `Sync: Connected`.
+
+#### 5. Decoy Call & Accelerometer Shake Detection
+To allow hands-free panic-escape triggers:
+* **Accelerometer Streaming**: The module binds to `devicemotion` events on the browser window to monitor 3D force coordinates (`accelerationIncludingGravity`).
+* **iOS/Android Permission Gateway**: As modern mobile browsers restrict motion sensors, enabling "Shake to Trigger" prompts the standard permission prompt modal requiring user consent.
+* **Force Speed Analysis**: The engine computes acceleration changes over 100ms intervals. Shaking forces exceeding `18m/s²` immediately trigger the decoy incoming call screen.
+* **Presentation Simulator Key**: Pressing the `S` key on a keyboard acts as a simulated shake event, allowing presenters to demonstrate the feature on desktop/laptop setups without physically moving the computer.
+
+#### 6. Incapacitation Safeguard (Arrival Check-in)
+To protect a user who may become incapacitated at the end of a route:
+* **Check-in Prompt**: Upon arriving at the selected destination coordinate, the transit tracking HUD transitions from regular ETA display to an alert state, prompting the user with a green flashing check-in bar containing an "I'm Safe" button.
+* **10-second Verification Countdown**: A local timer initializes a 10-second countdown (representing the customizable check-in buffer).
+* **Automatic SOS Escalation**: If the user checks in within 10 seconds, the check-in is complete, the bar closes, and normal status is restored. If the countdown runs out, the system assumes the user is incapacitated, cancels standby mode, and immediately triggers the fullscreen **EMERGENCY ACTIVATED** broadcast overlay and synthesized siren sound to alert nearby citizens and remote guardians.
+
+#### 7. Crowdsourced Safety Alerts & Live Safety Score Recalculation
+To build a collaborative community protection network:
+* **Anonymized Local Reporting**: Tapping the "Report Local Hazard" button under the Safety Assessment panel opens a selection list containing common hazard types (Broken Streetlights, Suspicious Group, Isolated Area, Road Obstruction).
+* **Live Heatmap Integration**: Selecting a hazard queries the user's current coordinate telemetry and calls Leaflet hooks to overlay a new caution marker and a dotted red circular hazard warning zone (representing community-reported danger sectors).
+* **Dynamic Safety Assessment score Drop**: The system recalculates the neighborhood safety score, dropping it to a caution level (52%), changing the gauge indicator border to yellow, and updating the status text to recommend alternate routes.
+* **Global Telemetry Uplink Logs**: Pushes a crowdsourced alert event (`Community - Anon: Broken Streetlights reported nearby`) to the telemetry feed to notify guardians.

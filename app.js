@@ -21,7 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     currentLng: 78.324208,
     speed: 0,
     timeElapsed: 0,
-    activeRoute: null
+    activeRoute: null,
+    isOnline: navigator.onLine,
+    offlineQueue: JSON.parse(localStorage.getItem('shakthi_telemetry_queue') || '[]'),
+    shakeActive: false
   };
 
   // Initialize Modules
@@ -31,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initAudioVault();
   initTelemetryLog();
   initContactsEditor();
+  initConnectivityMonitor();
+  initArrivalVerification();
+  initHazardReporting();
 });
 
 /* ==========================================================================
@@ -65,6 +71,10 @@ function initSOS() {
   const deactivateSosBtn = document.getElementById('deactivate-sos');
   const statusIndicator = document.querySelector('.status-indicator');
   const statusText = document.querySelector('.status-text');
+
+  // Emergency overlay specific buttons
+  const emergencyToggleSiren = document.getElementById('emergency-toggle-siren');
+  const emergencyCallGuardian = document.getElementById('emergency-call-guardian');
 
   let countdownInterval = null;
   let countdownCount = 3;
@@ -121,6 +131,12 @@ function initSOS() {
       toggleSirenAlarm(true);
     }
 
+    // Update Guardian number link dynamically on launch
+    const guardianPhone = document.getElementById('contact-p-phone').textContent.trim();
+    if (emergencyCallGuardian && guardianPhone) {
+      emergencyCallGuardian.setAttribute('href', `tel:${guardianPhone.replace(/\s+/g, '')}`);
+    }
+
     // Append to telemetry logs
     logTelemetryEntry("CRITICAL", "SOS BROADCAST ACTIVE", "0 km/h", "ALERT");
 
@@ -133,6 +149,9 @@ function initSOS() {
       window.mapModule.triggerEmergencyOnMap();
     }
   };
+
+  // Expose to window for arrival check-in fallback
+  window.activateEmergencyBroadcast = activateEmergency;
 
   const deactivateEmergency = () => {
     window.appState.sosActive = false;
@@ -157,6 +176,13 @@ function initSOS() {
   sosTrigger.addEventListener('click', triggerSOSCountdown);
   cancelSosBtn.addEventListener('click', cancelSOS);
   deactivateSosBtn.addEventListener('click', deactivateEmergency);
+
+  // Hook up emergency screen toggle siren button
+  if (emergencyToggleSiren) {
+    emergencyToggleSiren.addEventListener('click', () => {
+      toggleSirenAlarm(!window.appState.sirenActive);
+    });
+  }
 }
 
 /* ==========================================================================
@@ -181,24 +207,55 @@ function toggleSirenAlarm(activate) {
   const toggleSirenBtn = document.getElementById('toggle-siren');
   const sirenWidget = document.getElementById('widget-siren');
   const sirenStatus = document.getElementById('siren-status-text');
-  const sirenIcon = sirenWidget.querySelector('.action-icon');
+  const sirenIcon = sirenWidget ? sirenWidget.querySelector('.action-icon') : null;
+
+  // Emergency overlay elements
+  const emergencySirenBtn = document.getElementById('emergency-toggle-siren');
+  const emergencySirenStatus = document.getElementById('emergency-siren-status');
+  const emergencySirenDesc = document.getElementById('emergency-siren-desc');
 
   if (activate) {
     window.appState.sirenActive = true;
-    toggleSirenBtn.classList.add('active');
-    sirenIcon.classList.add('active');
-    sirenStatus.textContent = "ACTIVE (Loud)";
-    sirenStatus.style.color = "var(--color-crimson)";
+    if (toggleSirenBtn) toggleSirenBtn.classList.add('active');
+    if (sirenIcon) sirenIcon.classList.add('active');
+    if (sirenStatus) {
+      sirenStatus.textContent = "ACTIVE (Loud)";
+      sirenStatus.style.color = "var(--color-crimson)";
+    }
     logTelemetryEntry("Safety", "Siren Enabled", "--", "--");
     startSirenSound();
+
+    // Update Emergency Overlay Siren button
+    if (emergencySirenBtn) {
+      emergencySirenBtn.classList.add('siren-active');
+    }
+    if (emergencySirenStatus) {
+      emergencySirenStatus.textContent = "Siren ON (Loud)";
+    }
+    if (emergencySirenDesc) {
+      emergencySirenDesc.textContent = "Tap to silence alarm";
+    }
   } else {
     window.appState.sirenActive = false;
-    toggleSirenBtn.classList.remove('active');
-    sirenIcon.classList.remove('active');
-    sirenStatus.textContent = "Inactive";
-    sirenStatus.style.color = "";
+    if (toggleSirenBtn) toggleSirenBtn.classList.remove('active');
+    if (sirenIcon) sirenIcon.classList.remove('active');
+    if (sirenStatus) {
+      sirenStatus.textContent = "Inactive";
+      sirenStatus.style.color = "";
+    }
     logTelemetryEntry("Safety", "Siren Disabled", "--", "--");
     stopSirenSound();
+
+    // Update Emergency Overlay Siren button
+    if (emergencySirenBtn) {
+      emergencySirenBtn.classList.remove('siren-active');
+    }
+    if (emergencySirenStatus) {
+      emergencySirenStatus.textContent = "Toggle Siren";
+    }
+    if (emergencySirenDesc) {
+      emergencySirenDesc.textContent = "Loud acoustic beacon";
+    }
   }
 }
 
@@ -278,14 +335,22 @@ function initFakeCall() {
   const screenOverlay = document.getElementById('fake-call-screen');
   const declineBtn = document.getElementById('decline-fakecall');
   const acceptBtn = document.getElementById('accept-fakecall');
+  
+  // Shake configuration elements
+  const toggleShakeBtn = document.getElementById('toggle-shake-call');
+  const shakeStatusText = document.getElementById('shake-status-text');
+
+  const triggerCallInstantly = () => {
+    logTelemetryEntry("Safety", "Incoming Fake Call Active", "--", "--");
+    screenOverlay.classList.add('active');
+    startFakeCallRing();
+  };
 
   triggerBtn.addEventListener('click', () => {
     logTelemetryEntry("Safety", "Scheduling Fake Call...", "--", "--");
     // 2-second delay to allow putting phone down/away
     setTimeout(() => {
-      screenOverlay.classList.add('active');
-      startFakeCallRing();
-      logTelemetryEntry("Safety", "Incoming Fake Call Active", "--", "--");
+      triggerCallInstantly();
     }, 2000);
   });
 
@@ -297,6 +362,105 @@ function initFakeCall() {
 
   declineBtn.addEventListener('click', () => stopCall("Declined"));
   acceptBtn.addEventListener('click', () => stopCall("Accepted"));
+
+  // Shake to Trigger Switch logic
+  if (toggleShakeBtn) {
+    toggleShakeBtn.addEventListener('click', () => {
+      const active = !window.appState.shakeActive;
+      window.appState.shakeActive = active;
+      
+      if (active) {
+        toggleShakeBtn.classList.add('active');
+        shakeStatusText.textContent = "Shake to Trigger: ON";
+        shakeStatusText.style.color = "var(--color-emerald)";
+        logTelemetryEntry("Safety", "Shake-to-Decoy Activated", "--", "--");
+        
+        // Request Device Motion permissions on mobile if supported
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+          DeviceMotionEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                console.log("DeviceMotion sensor access granted.");
+              } else {
+                console.warn("DeviceMotion access denied.");
+                shakeStatusText.textContent = "Shake to Trigger: Permission Denied";
+                shakeStatusText.style.color = "var(--color-crimson)";
+              }
+            })
+            .catch(err => {
+              console.error("Error requesting DeviceMotion permission: ", err);
+            });
+        }
+      } else {
+        toggleShakeBtn.classList.remove('active');
+        shakeStatusText.textContent = "Shake to Trigger: OFF";
+        shakeStatusText.style.color = "";
+        logTelemetryEntry("Safety", "Shake-to-Decoy Deactivated", "--", "--");
+      }
+    });
+  }
+
+  // Device Motion Shake detection event
+  let lastX = null, lastY = null, lastZ = null;
+  let lastUpdate = 0;
+  
+  window.addEventListener('devicemotion', (event) => {
+    if (!window.appState.shakeActive) return;
+    
+    // Prevent shake trigger if the decoy screen is already active
+    if (screenOverlay.classList.contains('active')) return;
+
+    const acceleration = event.accelerationIncludingGravity || event.acceleration;
+    if (!acceleration) return;
+
+    const curTime = Date.now();
+    if ((curTime - lastUpdate) > 100) {
+      const diffTime = curTime - lastUpdate;
+      lastUpdate = curTime;
+
+      const x = acceleration.x;
+      const y = acceleration.y;
+      const z = acceleration.z;
+
+      if (lastX !== null) {
+        // Calculate motion delta
+        const deltaX = Math.abs(x - lastX);
+        const deltaY = Math.abs(y - lastY);
+        const deltaZ = Math.abs(z - lastZ);
+        
+        // Compute speed index based on acceleration change over time
+        const speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
+        
+        // Threshold check: 18+ represents sudden shaking force
+        if (speed > 18) {
+          logTelemetryEntry("CRITICAL", "SHAKE EVENT DETECTED", "--", "Decoy");
+          triggerCallInstantly();
+        }
+      }
+      lastX = x;
+      lastY = y;
+      lastZ = z;
+    }
+  });
+
+  // Desktop keyboard simulator trigger ('S' key) for presentation demonstration
+  window.addEventListener('keydown', (event) => {
+    if (!window.appState.shakeActive) return;
+    
+    // Ignore keys if user is typing in input fields
+    const activeEl = document.activeElement;
+    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+      return;
+    }
+    
+    if (event.key === 'S' || event.key === 's') {
+      // Prevent double trigger if decoy screen is already visible
+      if (screenOverlay.classList.contains('active')) return;
+
+      logTelemetryEntry("CRITICAL", "SIMULATED SHAKE EVENT", "--", "Decoy");
+      triggerCallInstantly();
+    }
+  });
 }
 
 function startFakeCallRing() {
@@ -446,20 +610,44 @@ function logTelemetryEntry(type, coords, speed, battery) {
   const now = new Date();
   const timestamp = now.toTimeString().split(' ')[0]; // HH:MM:SS
 
+  // Queue telemetry if it represents positional tracking and we are offline
+  let isOfflineData = false;
+  if (!window.appState.isOnline && (type === 'Track' || type === 'ALERT' || type === 'CRITICAL')) {
+    // Add to offline queue
+    const logItem = { timestamp, type, coords, speed, battery };
+    window.appState.offlineQueue.push(logItem);
+    localStorage.setItem('shakthi_telemetry_queue', JSON.stringify(window.appState.offlineQueue));
+    isOfflineData = true;
+    
+    // Update connectivity UI counter
+    if (typeof window.updateConnectivityUI === 'function') {
+      window.updateConnectivityUI();
+    }
+  }
+
   const entry = document.createElement('div');
   entry.className = `log-row log-entry`;
   if (type === 'CRITICAL' || type === 'ALERT') {
     entry.classList.add('sos-alert-log');
   }
+  
+  if (isOfflineData) {
+    entry.classList.add('offline-log-entry');
+  }
 
   // Format coordinates cleanly if it's a number pair
   let coordsHTML = `<span class="log-coordinate">${coords}</span>`;
   
+  let syncStatusText = battery;
+  if (isOfflineData) {
+    syncStatusText = "QUEUED";
+  }
+
   entry.innerHTML = `
     <span>${timestamp}</span>
     ${coordsHTML}
     <span>${speed}</span>
-    <span>${battery}</span>
+    <span style="${isOfflineData ? 'color: var(--color-amber); font-weight: bold;' : ''}">${syncStatusText}</span>
   `;
 
   // Prepend to show latest at top
@@ -522,5 +710,188 @@ function initContactsEditor() {
 
     modalOverlay.classList.remove('show');
     logTelemetryEntry("Contacts", "Guardian Info Updated", "--", "--");
+  });
+}
+
+/* ==========================================================================
+   8. OFFLINE-FIRST CONNECTIVITY MONITOR & BUFFER QUEUE
+   ========================================================================== */
+function initConnectivityMonitor() {
+  const updateStatus = () => {
+    const isOnline = navigator.onLine;
+    window.appState.isOnline = isOnline;
+    
+    const container = document.getElementById('connection-status');
+    const textEl = document.getElementById('connection-text');
+    
+    if (!container || !textEl) return;
+    
+    if (isOnline) {
+      container.className = "connectivity-status online";
+      container.setAttribute('title', 'Telemetry synced with cloud server');
+      
+      const queueCount = window.appState.offlineQueue.length;
+      if (queueCount > 0) {
+        textEl.textContent = `Sync: Recovering (${queueCount} items)...`;
+        // Flush queue in background
+        flushOfflineQueue();
+      } else {
+        textEl.textContent = "Sync: Connected";
+      }
+      // Set normal cloud icon
+      container.innerHTML = `<i data-lucide="cloud"></i><span id="connection-text">${textEl.textContent}</span>`;
+    } else {
+      container.className = "connectivity-status offline";
+      container.setAttribute('title', 'Device offline (Dead Zone). Buffering data locally.');
+      
+      const queueCount = window.appState.offlineQueue.length;
+      textEl.textContent = `Offline (${queueCount} queued)`;
+      // Set cloud-off icon (strike-through cloud)
+      container.innerHTML = `<i data-lucide="cloud-off"></i><span id="connection-text">${textEl.textContent}</span>`;
+    }
+    
+    // Refresh Lucide icons in container
+    lucide.createIcons();
+  };
+  
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+  
+  // Expose updates to other scripts
+  window.updateConnectivityUI = updateStatus;
+  
+  // Initial check
+  updateStatus();
+}
+
+function flushOfflineQueue() {
+  if (window.appState.offlineQueue.length === 0) return;
+  
+  const itemsToSync = [...window.appState.offlineQueue];
+  const count = itemsToSync.length;
+  
+  logTelemetryEntry("Uplink", `Syncing ${count} buffered entries...`, "--", "Syncing");
+  
+  // Simulate sync delay
+  setTimeout(() => {
+    // Clear queue
+    window.appState.offlineQueue = [];
+    localStorage.removeItem('shakthi_telemetry_queue');
+    
+    // Update UI
+    if (typeof window.updateConnectivityUI === 'function') {
+      window.updateConnectivityUI();
+    }
+    
+    logTelemetryEntry("Uplink", `Sync Completed! ${count} items flushed`, "--", "Online");
+  }, 1500);
+}
+
+/* ==========================================================================
+   9. SAFE ARRIVAL VERIFICATION & CHECK-IN
+   ========================================================================== */
+let verificationCountdownInterval = null;
+
+function initArrivalVerification() {
+  const verificationBar = document.getElementById('arrival-verification');
+  const timerEl = document.getElementById('verification-timer');
+  const safeTriggerBtn = document.getElementById('im-safe-trigger');
+  
+  if (!safeTriggerBtn) return;
+  
+  safeTriggerBtn.addEventListener('click', () => {
+    // User checked in safe!
+    clearInterval(verificationCountdownInterval);
+    verificationCountdownInterval = null;
+    if (verificationBar) verificationBar.style.display = 'none';
+    
+    const transitStatusText = document.getElementById('transit-status');
+    const transitETAText = document.getElementById('transit-eta');
+    if (transitStatusText) transitStatusText.textContent = 'Arrived safely at destination!';
+    if (transitETAText) transitETAText.textContent = '0 mins remaining';
+    
+    // Log safe arrival
+    logTelemetryEntry("Arrived", "Checked in Safe (Manual)", "0 km/h", `${window.appState.currentBattery}%`);
+  });
+  
+  window.triggerArrivalVerification = (endCoords) => {
+    // Show verification prompt
+    if (verificationBar) verificationBar.style.display = 'flex';
+    
+    let timeRemaining = 10; // 10 seconds for demo convenience
+    if (timerEl) timerEl.textContent = `${timeRemaining}s`;
+    
+    logTelemetryEntry("Arrival Check", "Verification countdown initialized (10s)", "--", "--");
+    
+    clearInterval(verificationCountdownInterval);
+    verificationCountdownInterval = setInterval(() => {
+      timeRemaining--;
+      if (timerEl) timerEl.textContent = `${timeRemaining}s`;
+      
+      if (timeRemaining <= 0) {
+        clearInterval(verificationCountdownInterval);
+        verificationCountdownInterval = null;
+        if (verificationBar) verificationBar.style.display = 'none';
+        
+        // User failed to check in (Incapacitated scenario!)
+        logTelemetryEntry("CRITICAL", "NO ARRIVAL CHECK-IN RECEIVED (INCAPACITATED)", "0 km/h", "ALERT");
+        
+        // Trigger SOS emergency broadcast immediately!
+        if (typeof window.activateEmergencyBroadcast === 'function') {
+          window.activateEmergencyBroadcast();
+        } else {
+          const sosTrigger = document.getElementById('sos-trigger');
+          if (sosTrigger) sosTrigger.click();
+        }
+      }
+    }, 1000);
+  };
+}
+
+/* ==========================================================================
+   10. COMMUNITY HAZARD REPORTING (CROWDSOURCING)
+   ========================================================================== */
+function initHazardReporting() {
+  const triggerBtn = document.getElementById('report-hazard-trigger');
+  const modalOverlay = document.getElementById('hazard-report-modal');
+  const closeBtn = document.getElementById('close-hazard');
+  const hazardOptions = document.querySelectorAll('.hazard-opt');
+
+  if (!triggerBtn || !modalOverlay) return;
+
+  // Show selection overlay
+  triggerBtn.addEventListener('click', () => {
+    modalOverlay.classList.add('show');
+  });
+
+  // Hide selection overlay
+  closeBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+  });
+
+  // Handle hazard choice clicks
+  hazardOptions.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-type');
+      const lat = window.appState.currentLat;
+      const lng = window.appState.currentLng;
+
+      // Anonymously spawn hazard warning indicators on Map
+      if (window.mapModule && typeof window.mapModule.addCommunityHazard === 'function') {
+        window.mapModule.addCommunityHazard(lat, lng, type);
+      }
+
+      // Live update Zone Safety rating index
+      // Drops safety index from initial 90% down to 52%, updating gauge rings and warnings
+      if (window.mapModule && typeof window.mapModule.updateSafetyAssessmentScore === 'function') {
+        window.mapModule.updateSafetyAssessmentScore(52, "Local Hazard Reported", `Anonymized community report of ${type} nearby.`);
+      }
+
+      // Log in Telemetry Uplink feed
+      logTelemetryEntry("Community", `Anon: ${type} reported nearby`, "--", "Alert");
+
+      // Close modal
+      modalOverlay.classList.remove('show');
+    });
   });
 }
