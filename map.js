@@ -442,13 +442,22 @@ window.mapModule = (function() {
     lucide.createIcons();
   }
 
+  function invalidateMapSize() {
+    if (map) {
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+    }
+  }
+
   // Initializer window hook
   return {
     init: init,
     triggerEmergencyOnMap: triggerEmergencyOnMap,
     clearEmergencyOnMap: clearEmergencyOnMap,
     updateSafetyAssessmentScore: updateSafetyAssessmentScore,
-    addCommunityHazard: addCommunityHazard
+    addCommunityHazard: addCommunityHazard,
+    invalidateMapSize: invalidateMapSize
   };
 })();
 

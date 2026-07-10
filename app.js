@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initConnectivityMonitor();
   initArrivalVerification();
   initHazardReporting();
+  initNavigation();
 
   // Technical Credibility Upgrades (v3.2.0)
   initStealthMode();
@@ -1153,7 +1154,46 @@ function initHazardReporting() {
 }
 
 /* ==========================================================================
-   11. STEALTH MODE / BLACKOUT MODE
+   11. TAB-BASED APP ROUTING & NAVIGATION
+   ========================================================================== */
+function initNavigation() {
+  const navDashboard = document.getElementById('nav-dashboard');
+  const navAbout = document.getElementById('nav-about');
+  const dashboardContainer = document.querySelector('.dashboard-container');
+  const aboutSection = document.getElementById('about-section');
+
+  if (!navDashboard || !navAbout || !dashboardContainer || !aboutSection) return;
+
+  navDashboard.addEventListener('click', () => {
+    navDashboard.classList.add('active');
+    navAbout.classList.remove('active');
+    dashboardContainer.classList.remove('hidden');
+    aboutSection.classList.add('hidden');
+
+    // Reset scroll positions to simulate clean page load
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    dashboardContainer.scrollTop = 0;
+
+    // Trigger Leaflet map invalidateSize so it redraws properly
+    if (window.mapModule && typeof window.mapModule.invalidateMapSize === 'function') {
+      window.mapModule.invalidateMapSize();
+    }
+  });
+
+  navAbout.addEventListener('click', () => {
+    navAbout.classList.add('active');
+    navDashboard.classList.remove('active');
+    aboutSection.classList.remove('hidden');
+    dashboardContainer.classList.add('hidden');
+
+    // Reset scroll positions to simulate clean page load
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    aboutSection.scrollTop = 0;
+  });
+}
+
+/* ==========================================================================
+   12. STEALTH MODE / BLACKOUT MODE
    ========================================================================== */
 function initStealthMode() {
   const toggleBtn = document.getElementById('stealth-toggle');
