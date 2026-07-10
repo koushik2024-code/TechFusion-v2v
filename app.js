@@ -81,6 +81,7 @@ function initSOS() {
   let countdownCount = 3;
 
   const triggerSOSCountdown = () => {
+    if (window.appState.sosActive) return; // Prevent double trigger if already active
     countdownCount = 3;
     countdownNum.textContent = countdownCount;
     countdownOverlay.classList.add('show');
@@ -597,6 +598,7 @@ function initVoiceTrigger() {
     };
 
     recognition.onresult = (event) => {
+      if (window.appState.sosActive) return; // Ignore voice keywords if SOS is already active
       const resultIndex = event.resultIndex;
       const transcript = event.results[resultIndex][0].transcript.toLowerCase();
       console.log("Voice Transcript:", transcript);
