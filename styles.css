@@ -2140,4 +2140,163 @@ body {
 .hazard-opt svg { width: 14px; height: 14px; }
 .action-trigger-btn svg { width: 16px; height: 16px; }
 
+/* ── Stealth Mode Toggle Button ────────────────────────────────────────── */
+.stealth-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.stealth-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border-color: var(--color-cyan);
+}
+
+.stealth-toggle-btn.active {
+  background: rgba(255, 56, 96, 0.15);
+  color: #ff3860;
+  border-color: #ff3860;
+  box-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
+}
+
+.stealth-toggle-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* ── Stealth / Blackout Mode Styles ─────────────────────────────────────── */
+body.stealth-active {
+  filter: brightness(0.6) contrast(1.1);
+  background: #000000 !important;
+}
+
+body.stealth-active .bg-orb {
+  display: none !important;
+}
+
+body.stealth-active #map {
+  filter: invert(1) hue-rotate(180deg) brightness(0.4) contrast(1.4) !important;
+}
+
+body.stealth-active .glass-card {
+  background: rgba(0, 0, 0, 0.96) !important;
+  border-color: rgba(255, 56, 96, 0.2) !important;
+  box-shadow: none !important;
+}
+
+body.stealth-active .glass-card::after {
+  background: linear-gradient(90deg, #ff3860, transparent) !important;
+}
+
+body.stealth-active .logo-icon-glow {
+  background: #ff3860 !important;
+  box-shadow: none !important;
+}
+
+body.stealth-active .logo-text h1 span {
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+  color: #ff3860 !important;
+}
+
+body.stealth-active .logo-text h1 {
+  color: #888 !important;
+}
+
+/* ── Tabbed Log Panel Styles ────────────────────────────────────────────── */
+.log-tab {
+  opacity: 0.6;
+  border-bottom: 2px solid transparent !important;
+}
+
+.log-tab:hover {
+  opacity: 0.9;
+}
+
+.log-tab.active {
+  opacity: 1 !important;
+  color: white !important;
+  border-bottom: 2px solid var(--color-cyan) !important;
+}
+
+/* ── Audit Trail / System Event Log ─────────────────────────────────────── */
+.audit-entry {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  border-left: 3px solid #666;
+}
+
+.audit-entry.severity-system {
+  border-left-color: var(--color-cyan);
+}
+
+.audit-entry.severity-safety {
+  border-left-color: var(--color-emerald);
+}
+
+.audit-entry.severity-warning {
+  border-left-color: var(--color-amber);
+  color: var(--color-amber);
+}
+
+.audit-entry.severity-critical {
+  border-left-color: #ff3860;
+  color: #ff3860;
+  animation: logPulse 2s infinite alternate;
+}
+
+.audit-entry.severity-resolved {
+  border-left-color: var(--color-emerald);
+  color: var(--color-emerald);
+}
+
+.audit-badge {
+  font-size: 0.58rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.badge-system { color: var(--color-cyan); }
+.badge-safety { color: var(--color-emerald); }
+.badge-warning { color: var(--color-amber); }
+.badge-critical { color: #ff3860; background: rgba(255, 56, 96, 0.15); }
+.badge-resolved { color: var(--color-emerald); }
+
+@keyframes logPulse {
+  0% { background: rgba(255, 56, 96, 0.02); }
+  100% { background: rgba(255, 56, 96, 0.1); }
+}
+
+/* ── Low Battery Banner Animation ───────────────────────────────────────── */
+.low-battery-banner {
+  animation: bannerSlideDown 0.5s ease-out;
+}
+
+@keyframes bannerSlideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
 

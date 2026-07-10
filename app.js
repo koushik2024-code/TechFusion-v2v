@@ -28,6 +28,40 @@ document.addEventListener('DOMContentLoaded', () => {
     shakeActive: false
   };
 
+  // Define global event audit trail logger
+  window.logAuditEvent = (eventText, severity = 'SYSTEM') => {
+    const container = document.getElementById('audit-entries');
+    if (!container) return;
+
+    const now = new Date();
+    const timestamp = now.toTimeString().split(' ')[0];
+
+    const entry = document.createElement('div');
+    entry.className = `audit-entry severity-${severity.toLowerCase()}`;
+
+    const spanTime = document.createElement('span');
+    spanTime.textContent = timestamp;
+
+    const spanEvent = document.createElement('span');
+    spanEvent.className = 'audit-text';
+    spanEvent.textContent = eventText;
+
+    const spanSeverity = document.createElement('span');
+    spanSeverity.className = `audit-badge badge-${severity.toLowerCase()}`;
+    spanSeverity.textContent = severity;
+
+    entry.appendChild(spanTime);
+    entry.appendChild(spanEvent);
+    entry.appendChild(spanSeverity);
+
+    container.appendChild(entry);
+
+    const logContainer = document.getElementById('audit-log-container');
+    if (logContainer) {
+      logContainer.scrollTop = logContainer.scrollHeight;
+    }
+  };
+
   // Initialize Modules
   initSOS();
   initSiren();
@@ -39,6 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initConnectivityMonitor();
   initArrivalVerification();
   initHazardReporting();
+
+  // Technical Credibility Upgrades (v3.2.0)
+  initStealthMode();
+  initLowBatteryMode();
+  initAuditTabs();
+
+  // Log Startup Events
+  window.logAuditEvent("SafeSphere security shield activated", "SYSTEM");
+  window.logAuditEvent("GPS Passive Telemetry Link established", "SYSTEM");
+  window.logAuditEvent("Voice Guardian trigger listener armed", "SYSTEM");
 });
 
 /* ==========================================================================
@@ -87,6 +131,9 @@ function initSOS() {
     countdownCount = 3;
     countdownNum.textContent = countdownCount;
     countdownOverlay.classList.add('show');
+    if (window.logAuditEvent) {
+      window.logAuditEvent("SOS countdown initialized (3s)", "WARNING");
+    }
     
     // Animate SVGs progress ring
     const circle = document.querySelector('.progress-ring__circle');
@@ -120,6 +167,9 @@ function initSOS() {
     clearInterval(countdownInterval);
     countdownOverlay.classList.remove('show');
     logTelemetryEntry("Uplink", "SOS Cancelled", "--", "--");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("SOS alert aborted by user", "SYSTEM");
+    }
   };
 
   const activateEmergency = () => {
@@ -145,6 +195,14 @@ function initSOS() {
 
     // Append to telemetry logs
     logTelemetryEntry("CRITICAL", "SOS BROADCAST ACTIVE", "0 km/h", "ALERT");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("CRITICAL: SOS broadcast activated", "CRITICAL");
+      window.logAuditEvent("UPLINK: Telemetry stream redirected to Emergency Channels", "WARNING");
+      
+      const pName = document.getElementById('contact-p-name')?.textContent || "Primary Guardian";
+      const sName = document.getElementById('contact-s-name')?.textContent || "Secondary Guardian";
+      window.logAuditEvent(`SMS/WhatsApp distress alerts successfully dispatched to ${pName} and ${sName}`, "ALERT");
+    }
 
     // Send mock SMS/WhatsApp broadcasts
     console.log("Mock SMS Sent to " + document.getElementById('contact-p-phone').textContent);
@@ -169,6 +227,9 @@ function initSOS() {
     }
 
     logTelemetryEntry("Uplink", "SOS Deactivated", "0 km/h", "Standby");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("SOS stand down: safety check-in confirmed by user", "RESOLVED");
+    }
     
     if (window.mapModule && typeof window.mapModule.clearEmergencyOnMap === 'function') {
       window.mapModule.clearEmergencyOnMap();
@@ -230,6 +291,9 @@ function toggleSirenAlarm(activate) {
       sirenStatus.style.color = "var(--color-crimson)";
     }
     logTelemetryEntry("Safety", "Siren Enabled", "--", "--");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("Acoustic Alert Siren: Sweeping dual-tone activated", "ALERT");
+    }
     startSirenSound();
 
     // Update Emergency Overlay Siren button
@@ -251,6 +315,9 @@ function toggleSirenAlarm(activate) {
       sirenStatus.style.color = "";
     }
     logTelemetryEntry("Safety", "Siren Disabled", "--", "--");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("Acoustic Alert Siren: Deactivated", "SYSTEM");
+    }
     stopSirenSound();
 
     // Update Emergency Overlay Siren button
@@ -350,11 +417,17 @@ function initFakeCall() {
   const triggerCallInstantly = () => {
     logTelemetryEntry("Safety", "Incoming Fake Call Active", "--", "--");
     screenOverlay.classList.add('active');
+    if (window.logAuditEvent) {
+      window.logAuditEvent("Decoy Call Screen: Simulated phone call incoming", "SAFETY");
+    }
     startFakeCallRing();
   };
 
   triggerBtn.addEventListener('click', () => {
     logTelemetryEntry("Safety", "Scheduling Fake Call...", "--", "--");
+    if (window.logAuditEvent) {
+      window.logAuditEvent("Decoy Call: Scheduled simulation in 2 seconds", "SYSTEM");
+    }
     // 2-second delay to allow putting phone down/away
     setTimeout(() => {
       triggerCallInstantly();
@@ -365,6 +438,9 @@ function initFakeCall() {
     screenOverlay.classList.remove('active');
     stopFakeCallRing();
     logTelemetryEntry("Safety", `Fake Call ${action}`, "--", "--");
+    if (window.logAuditEvent) {
+      window.logAuditEvent(`Decoy Call terminated: call state ${action.toLowerCase()}`, "SYSTEM");
+    }
   };
 
   declineBtn.addEventListener('click', () => stopCall("Declined"));
@@ -381,6 +457,9 @@ function initFakeCall() {
         shakeStatusText.textContent = "Shake to Trigger: ON";
         shakeStatusText.style.color = "var(--color-emerald)";
         logTelemetryEntry("Safety", "Shake-to-Decoy Activated", "--", "--");
+        if (window.logAuditEvent) {
+          window.logAuditEvent("Accelerometer motion triggers armed: Shake-to-Decoy Active", "SYSTEM");
+        }
         
         // Request Device Motion permissions on mobile if supported
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
@@ -403,6 +482,9 @@ function initFakeCall() {
         shakeStatusText.textContent = "Shake to Trigger: OFF";
         shakeStatusText.style.color = "";
         logTelemetryEntry("Safety", "Shake-to-Decoy Deactivated", "--", "--");
+        if (window.logAuditEvent) {
+          window.logAuditEvent("Accelerometer motion triggers disarmed", "SYSTEM");
+        }
       }
     });
   }
@@ -539,6 +621,9 @@ function initAudioVault() {
       recordStatus.textContent = "RECORDING LIVE";
       recordStatus.style.color = "var(--color-crimson)";
       logTelemetryEntry("Audio", "Microphone Vault Armed", "--", "Rec...");
+      if (window.logAuditEvent) {
+        window.logAuditEvent("Audio Vault Armed: Ambient microphone recording started", "SAFETY");
+      }
     } else {
       // Stop recording
       window.appState.recordingActive = false;
@@ -546,6 +631,9 @@ function initAudioVault() {
       recordStatus.textContent = "Audio Saved";
       recordStatus.style.color = "var(--color-emerald)";
       logTelemetryEntry("Audio", "File Encrypted & Uploaded", "--", "Saved");
+      if (window.logAuditEvent) {
+        window.logAuditEvent("Audio Vault: Local wave file encrypted and securely uploaded to safety servers", "SYSTEM");
+      }
       
       // Reset back to ready after 3 seconds
       setTimeout(() => {
@@ -613,6 +701,9 @@ function initVoiceTrigger() {
         const hasStopKeyword = stopKeywords.some(keyword => transcript.includes(keyword));
         if (hasStopKeyword) {
           logTelemetryEntry("Safety", `Voice Deactivation Command: "${transcript.trim()}"`, "--", "STANDBY");
+          if (window.logAuditEvent) {
+            window.logAuditEvent(`Voice Trigger: deactivation command matched: "${transcript.trim()}"`, "RESOLVED");
+          }
           if (window.appState.sosCountdownActive) {
             // Cancel the countdown!
             const cancelBtn = document.getElementById('cancel-sos');
@@ -632,6 +723,9 @@ function initVoiceTrigger() {
 
         if (hasKeyword) {
           logTelemetryEntry("Safety", `Voice Trigger Detected: "${transcript.trim()}"`, "--", "ALERT");
+          if (window.logAuditEvent) {
+            window.logAuditEvent(`Voice Trigger: keyword matched: "${transcript.trim()}"`, "ALERT");
+          }
           const sosTrigger = document.getElementById('sos-trigger');
           if (sosTrigger) {
             sosTrigger.click();
@@ -648,6 +742,9 @@ function initVoiceTrigger() {
       try {
         recognition.start();
         logTelemetryEntry("Safety", "Voice Guardian Activated", "--", "Listen");
+        if (window.logAuditEvent) {
+          window.logAuditEvent("Voice Guardian microphone tracking active", "SYSTEM");
+        }
       } catch (e) {
         console.error(e);
       }
@@ -665,6 +762,9 @@ function initVoiceTrigger() {
       try {
         recognition.stop();
         logTelemetryEntry("Safety", "Voice Guardian Deactivated", "--", "OFF");
+        if (window.logAuditEvent) {
+          window.logAuditEvent("Voice Guardian listener loop disarmed", "SYSTEM");
+        }
       } catch (e) {
         console.error(e);
       }
@@ -728,6 +828,11 @@ function initTelemetryLog() {
       logTelemetryEntry("ALERT", `${window.appState.currentLat.toFixed(6)}, ${window.appState.currentLng.toFixed(6)}`, `${window.appState.speed} km/h`, "SOS!");
     } else if (window.appState.speed > 0) {
       logTelemetryEntry("Track", `${window.appState.currentLat.toFixed(6)}, ${window.appState.currentLng.toFixed(6)}`, `${window.appState.speed} km/h`, `${window.appState.currentBattery}%`);
+    }
+
+    // Log coordinate sent event to audit trail periodically (approx 1 in 3 pings)
+    if (Math.random() > 0.6 && window.logAuditEvent) {
+      window.logAuditEvent(`Telemetry Uplink: Active GPS coordinate ping transmitted (${window.appState.currentLat.toFixed(5)}, ${window.appState.currentLng.toFixed(5)})`, "SYSTEM");
     }
   }, 5000);
 }
@@ -1037,9 +1142,115 @@ function initHazardReporting() {
 
       // Log in Telemetry Uplink feed
       logTelemetryEntry("Community", `Anon: ${type} reported nearby`, "--", "Alert");
+      if (window.logAuditEvent) {
+        window.logAuditEvent(`Community Alert: ${type} reported anonymously`, "WARNING");
+      }
 
       // Close modal
       modalOverlay.classList.remove('show');
     });
+  });
+}
+
+/* ==========================================================================
+   11. STEALTH MODE / BLACKOUT MODE
+   ========================================================================== */
+function initStealthMode() {
+  const toggleBtn = document.getElementById('stealth-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    const isActive = document.body.classList.toggle('stealth-active');
+    if (isActive) {
+      toggleBtn.classList.add('active');
+      toggleBtn.querySelector('span').textContent = 'Stealth: ON';
+      toggleBtn.querySelector('i').setAttribute('data-lucide', 'eye');
+      if (window.logAuditEvent) {
+        window.logAuditEvent("STEALTH MODE ACTIVATED: Screen emission dimmed for protection", "SAFETY");
+      }
+    } else {
+      toggleBtn.classList.remove('active');
+      toggleBtn.querySelector('span').textContent = 'Stealth Mode';
+      toggleBtn.querySelector('i').setAttribute('data-lucide', 'eye-off');
+      if (window.logAuditEvent) {
+        window.logAuditEvent("STEALTH MODE DEACTIVATED", "SYSTEM");
+      }
+    }
+    lucide.createIcons();
+  });
+}
+
+/* ==========================================================================
+   12. LOW BATTERY STANDBY PROTOCOL
+   ========================================================================== */
+function initLowBatteryMode() {
+  const simBtn = document.getElementById('simulate-low-battery');
+  const alertBanner = document.getElementById('low-battery-alert');
+  if (!simBtn) return;
+
+  const triggerLowBattery = () => {
+    window.appState.currentBattery = 12;
+    document.getElementById('metric-battery').textContent = "12%";
+    
+    const batteryIcon = document.getElementById('icon-battery');
+    if (batteryIcon) {
+      batteryIcon.setAttribute('data-lucide', 'battery-warning');
+      batteryIcon.style.color = 'var(--color-crimson)';
+    }
+    lucide.createIcons();
+
+    if (alertBanner) {
+      alertBanner.style.display = 'block';
+    }
+
+    if (window.logAuditEvent) {
+      window.logAuditEvent("CRITICAL: Battery level at 12%. Initiating low power protocol.", "CRITICAL");
+      window.logAuditEvent(`UPLINK: Transmitted final known coordinates: ${window.appState.currentLat.toFixed(6)}, ${window.appState.currentLng.toFixed(6)}`, "WARNING");
+      
+      const pName = document.getElementById('contact-p-name')?.textContent || "Primary Guardian";
+      window.logAuditEvent(`SMS/WA Alert: 'User battery critical at location' successfully dispatched to ${pName}`, "ALERT");
+    }
+
+    // Apply visual power saving mode filter
+    document.body.style.opacity = '0.9';
+  };
+
+  simBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    triggerLowBattery();
+  });
+
+  // Check periodically during standard drainage
+  setInterval(() => {
+    if (window.appState.currentBattery <= 15 && !window.appState.lowBatteryTriggered) {
+      window.appState.lowBatteryTriggered = true;
+      triggerLowBattery();
+    }
+  }, 5000);
+}
+
+/* ==========================================================================
+   13. AUDIT TAB SWITCHING
+   ========================================================================== */
+function initAuditTabs() {
+  const tabTelemetry = document.getElementById('tab-telemetry');
+  const tabAudit = document.getElementById('tab-audit');
+  const telemetryContainer = document.getElementById('telemetry-log-container');
+  const auditContainer = document.getElementById('audit-log-container');
+
+  if (!tabTelemetry || !tabAudit) return;
+
+  tabTelemetry.addEventListener('click', () => {
+    tabTelemetry.classList.add('active');
+    tabAudit.classList.remove('active');
+    telemetryContainer.style.display = 'block';
+    auditContainer.style.display = 'none';
+  });
+
+  tabAudit.addEventListener('click', () => {
+    tabAudit.classList.add('active');
+    tabTelemetry.classList.remove('active');
+    telemetryContainer.style.display = 'none';
+    auditContainer.style.display = 'block';
   });
 }

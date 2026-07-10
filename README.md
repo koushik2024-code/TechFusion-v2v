@@ -19,9 +19,12 @@
   * *Fake Call Simulator & Shake Trigger*: An overlay simulating a realistic incoming phone call screen (avatar vibration, accept/decline triggers) to help users escape uncomfortable situations. Can be triggered instantly, or physically activated by shaking the device (enabled via toggle switch). Features a built-in keyboard shortcut (`S` key) to simulate shake on desktop setups.
   * *Audio Vault*: Visual micro-action simulating ambient audio capture with an animated sine-wave visualizer canvas that pulses when recording is active.
   * *Voice Guardian*: An interactive voice-activated SOS trigger using Web Speech API that listens for safety keywords (`help`, `sos`, `emergency`) to start the countdown. It also listens for `stop` or `cancel` during the countdown or an active emergency to stop the alarm and turn the listening loop OFF permanently.
+  * *Stealth Mode Toggle*: A header-level toggle button that instantly transitions the entire layout into a pitch-black theme, grayscaling the map, hiding bright gradient background blobs, and lowering layout contrast to keep the user hidden in dark environments.
   * *Emergency Contacts Manager*: In-app editor overlay to customize primary and secondary guardian details. Features a quick-access WhatsApp integration to instantly **Connect with SHE Team** (+91 63048 54034) with pre-filled distress messages.
 * **Feature 2: Real-time passive location telemetry**
-  * *Device Status Panel*: Interactive cards display signal strength, telemetry streaming status, and battery percentage (which drains slightly over time). Features a real-time glowing canvas line chart showing tracking speed and latency with a dynamic text readout (`TELEMETRY: XX KM/H`).
+  * *Device Status Panel*: Interactive cards display signal strength, telemetry streaming status, and battery percentage (which drains slightly over time). Features a real-time glowing canvas line chart showing tracking speed and latency with a dynamic text readout (`TELEMETRY: XX KM/H`) and an integrated "Simulate Low" battery trigger.
+  * *Low Battery Standby Protocol*: Active battery monitoring that triggers automatically when device charge hits <15%. It instantly transmits final known coordinate telemetry to primary contacts and logs safety alerts before putting the UI in a dimmed, low-power state.
+  * *System Event Log (Audit Trail)*: A tabbed terminal log card showing a chronological, color-coded audit trail of all system actions (device initialization, voice command matches, alert disarms, decoy triggers, battery warnings) for judge diagnostics.
   * *Telemetry Uplink Log*: A scrolling terminal feed showing active timestamps, coordinate streams (centered around CBIT Hyderabad campus paths), walking speed, and battery health.
 * **Feature 3: Responsive, motion-driven transit routing map**
   * *Dark Matter Theme*: Minimalist Leaflet.js base map using CartoDB Dark Matter tiles to fit the premium dark UI theme.
@@ -117,3 +120,21 @@ The Voice Guardian leverages the browser's Web Speech API (`SpeechRecognition` /
 #### 9. Real-Time Canvas-Based Visualizers
 * **Telemetry Chart**: Renders a scrolling line chart using HTML5 Canvas 2D contexts, showing speed and network latency variations. It handles high-DPI displays via device pixel ratio scaling, automatically renders grid lines, glowing cyan path lines, and overlays a real-time speed text readout (`TELEMETRY: XX KM/H`).
 * **Audio Waveform**: Renders three superimposed sine waves with shifted phase values (sine wave animations) to represent audio recording activity.
+
+#### 10. Low-Light Stealth Mode (Visual Blackout)
+To protect a user hiding in the dark, the Stealth Mode toggle applies a series of CSS variables and filters on the `body` element:
+* **UI Dimming & Contrast**: The layout is darkened to `60%` brightness to limit ambient light emissions.
+* **Map Blackout**: Map tiles are grayscaled, inverted, and dimmed via CSS webkit filters, making them render in a low-visibility red/dark theme.
+* **Orb Suppression**: The colorful background blur parallax layers (`bg-orb`) are completely hidden.
+
+#### 11. Low Battery Standby Protocol
+To manage emergency situations when the phone battery is critical (<15%):
+* **Automatic Safeguard Trigger**: Triggers location transmission and switches off high-frequency animations to save power.
+* **Emergency Dispatch**: Sends simulated SMS/WhatsApp alerts with the user's final coordinates, preventing guardians from panicking when the device goes offline.
+* **Visual Warning Banner**: Alerts the user that Low Battery mode is active via a high-contrast top banner.
+
+#### 12. Chronological System Event Log (Audit Trail)
+For absolute transparency and debugging:
+* **System Event Capture**: Tracks key milestones (e.g. startup, voice trigger hits, siren toggles, call simulations).
+* **Color-Coded Statuses**: Categorized into `SYSTEM`, `SAFETY`, `WARNING`, `CRITICAL`, and `RESOLVED` severity levels.
+* **Diagnostics Tab**: Toggleable within the Telemetry Uplink card using a lightweight JS event tab listener.

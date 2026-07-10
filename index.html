@@ -17,10 +17,15 @@
   <!-- Font Awesome 6 - CSS-based icons, always reliable -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
   <!-- Custom CSS (Cache Busted) -->
-  <link rel="stylesheet" href="styles.css?v=3.1.3">
-  <link rel="stylesheet" href="design-map-overlay.css?v=3.1.3">
+  <link rel="stylesheet" href="styles.css?v=3.2.0">
+  <link rel="stylesheet" href="design-map-overlay.css?v=3.2.0">
 </head>
 <body>
+  <!-- Low Battery Mode Alert Banner -->
+  <div class="low-battery-banner" id="low-battery-alert" style="display: none; background: linear-gradient(90deg, #ff3860, #ff8a00); color: white; text-align: center; padding: 8px 12px; font-size: 0.8rem; font-weight: bold; font-family: var(--font-body); z-index: 1001; position: relative; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+    ⚠️ CRITICAL: Low Battery Mode Active (&lt;15%). Last known coordinates broadcasted to guardians. System in power saving mode.
+  </div>
+
   <!-- Animated Background Orbs (parallax-tracked by effects.js) -->
   <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
   <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
@@ -50,6 +55,11 @@
         <i data-lucide="cloud"></i>
         <span id="connection-text">Sync: Connected</span>
       </div>
+      <!-- Stealth Mode Toggle Button -->
+      <button class="stealth-toggle-btn" id="stealth-toggle" title="Toggle Low-Light Stealth Mode (Dims screen for protection)">
+        <i data-lucide="eye-off"></i>
+        <span>Stealth Mode</span>
+      </button>
       <div class="clock-display" id="system-clock">
         00:00:00 PM
       </div>
@@ -259,6 +269,7 @@
             <div class="metric-data">
               <span class="metric-label">Battery</span>
               <span class="metric-val" id="metric-battery">98%</span>
+              <span id="simulate-low-battery" style="display: block; font-size: 0.58rem; color: var(--color-cyan); cursor: pointer; text-decoration: underline; margin-top: 2px;" title="Test Low Battery mode for judges">Simulate Low</span>
             </div>
           </div>
           <div class="metric-item">
@@ -289,13 +300,16 @@
         </div>
       </div>
 
-      <!-- Real-Time Passive Telemetry Log -->
+      <!-- Real-Time Passive Telemetry & Event Log -->
       <div class="glass-card telemetry-card">
-        <div class="card-header">
-          <h3>Telemetry Uplink</h3>
-          <span class="badge blink">LIVE FEED</span>
+        <div class="card-header telemetry-header-tabs" style="display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; margin-bottom: 10px;">
+          <button class="log-tab active" id="tab-telemetry" style="background: none; border: none; color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; opacity: 1; padding: 4px 6px; border-bottom: 2px solid var(--color-cyan); transition: all 0.2s;">Telemetry</button>
+          <button class="log-tab" id="tab-audit" style="background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; cursor: pointer; opacity: 0.6; padding: 4px 6px; border-bottom: 2px solid transparent; transition: all 0.2s;">Event Log</button>
+          <span class="badge blink" style="margin-left: auto;">LIVE FEED</span>
         </div>
-        <div class="telemetry-log" id="telemetry-log-container">
+        
+        <!-- Live Telemetry Stream Grid -->
+        <div class="telemetry-log" id="telemetry-log-container" style="display: block;">
           <div class="log-row header-row">
             <span>Time</span>
             <span>Coordinates</span>
@@ -304,6 +318,18 @@
           </div>
           <div class="log-entries" id="telemetry-entries">
             <!-- Simulated logs will be appended here by JS -->
+          </div>
+        </div>
+
+        <!-- System Event Log / Audit Trail -->
+        <div class="audit-log" id="audit-log-container" style="display: none; height: 160px; overflow-y: auto;">
+          <div class="log-row header-row-audit" style="display: grid; grid-template-columns: 80px 1fr 60px; font-weight: bold; border-bottom: 1px solid var(--border-glass); padding-bottom: 6px; font-size: 0.72rem; color: var(--text-secondary);">
+            <span>Time</span>
+            <span>System Event / Audit Trail</span>
+            <span>Status</span>
+          </div>
+          <div class="log-entries" id="audit-entries" style="display: flex; flex-direction: column; gap: 4px; padding-top: 6px;">
+            <!-- Audit logs will be appended here by JS -->
           </div>
         </div>
       </div>
@@ -471,9 +497,9 @@
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Custom Application Scripts (Cache Busted) -->
-  <script src="app.js?v=3.1.3"></script>
-  <script src="map.js?v=3.1.3"></script>
+  <script src="app.js?v=3.2.0"></script>
+  <script src="map.js?v=3.2.0"></script>
   <!-- Advanced UI Effects: mouse tracking, particles, card tilt -->
-  <script src="effects.js?v=3.1.3"></script>
+  <script src="effects.js?v=3.2.0"></script>
 </body>
 </html>
