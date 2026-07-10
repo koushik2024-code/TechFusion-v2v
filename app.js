@@ -154,6 +154,7 @@ function initSOS() {
 
   // Expose to window for arrival check-in fallback
   window.activateEmergencyBroadcast = activateEmergency;
+  window.deactivateEmergencyBroadcast = deactivateEmergency;
 
   const deactivateEmergency = () => {
     window.appState.sosActive = false;
@@ -598,20 +599,31 @@ function initVoiceTrigger() {
     };
 
     recognition.onresult = (event) => {
-      if (window.appState.sosActive) return; // Ignore voice keywords if SOS is already active
       const resultIndex = event.resultIndex;
       const transcript = event.results[resultIndex][0].transcript.toLowerCase();
       console.log("Voice Transcript:", transcript);
 
-      const triggerKeywords = ["help", "emergency", "siren", "shakthi", "sos", "save me", "help me", "alert"];
-      const hasKeyword = triggerKeywords.some(keyword => transcript.includes(keyword));
+      if (window.appState.sosActive) {
+        // If SOS is active, listen for "stop" or "cancel" or "deactivate" to stand down
+        const stopKeywords = ["stop", "cancel", "deactivate", "stand down"];
+        const hasStopKeyword = stopKeywords.some(keyword => transcript.includes(keyword));
+        if (hasStopKeyword) {
+          logTelemetryEntry("Safety", `Voice Deactivation Command: "${transcript.trim()}"`, "--", "STANDBY");
+          if (window.deactivateEmergencyBroadcast) {
+            window.deactivateEmergencyBroadcast();
+          }
+        }
+      } else {
+        // If SOS is not active, listen for trigger keywords to activate
+        const triggerKeywords = ["help", "emergency", "siren", "shakthi", "sos", "save me", "help me", "alert"];
+        const hasKeyword = triggerKeywords.some(keyword => transcript.includes(keyword));
 
-      if (hasKeyword) {
-        logTelemetryEntry("Safety", `Voice Trigger Detected: "${transcript.trim()}"`, "--", "ALERT");
-        // Trigger emergency directly
-        const sosTrigger = document.getElementById('sos-trigger');
-        if (sosTrigger) {
-          sosTrigger.click();
+        if (hasKeyword) {
+          logTelemetryEntry("Safety", `Voice Trigger Detected: "${transcript.trim()}"`, "--", "ALERT");
+          const sosTrigger = document.getElementById('sos-trigger');
+          if (sosTrigger) {
+            sosTrigger.click();
+          }
         }
       }
     };
