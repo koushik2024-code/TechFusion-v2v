@@ -28,8 +28,14 @@
   * *Telemetry Uplink Log*: A scrolling terminal feed showing active timestamps, coordinate streams (centered around CBIT Hyderabad campus paths), walking speed, and battery health.
 * **Feature 3: Responsive, motion-driven transit routing map**
   * *Dark Matter Theme*: Minimalist Leaflet.js base map using CartoDB Dark Matter tiles to fit the premium dark UI theme.
-  * *Safe Havens & Caution Zones*: Pinpoints CCTV hubs, patrol checkpoints, and active guard posts (green) alongside caution zones like unlit corridors or construction zones (pulsing red circles).
-  * *Safe Transit Simulation*: Draws a path avoiding caution circles and animates the user's avatar moving from the Hostels to the Library, dynamically updating the HUD progress bar, remaining time, and segment safety descriptions.
+  - *Safe Havens & Caution Zones*: Pinpoints CCTV hubs, patrol checkpoints, and active guard posts (green) alongside caution zones like unlit corridors or construction zones (pulsing red circles).
+  - *Safe Transit Simulation*: Draws a path avoiding caution circles and animates the user's avatar moving from the Hostels to the Library, dynamically updating the HUD progress bar, remaining time, and segment safety descriptions.
+* **Feature 4: About & Regional Impact Page & Dynamic View Switching**
+  - *Sleek Page Swapping Tab Navigation*: Quick-access header navigation buttons that let the user swap view layers dynamically between the live Dashboard and the About page, with a smooth, premium slide-up fade-in transition.
+  - *Regional Safety Gaps & Statistics Grid*: A detailed, responsive comparison table/grid explaining regional public safety problems (infrastructure dark zones, response lag, and lack of crowdsourced reports) and how SafeSphere tackles them.
+  - *Automated Leaflet Layout Recalculation*: Auto-redraw system that triggers map invalidation on return to the Dashboard tab, preventing typical Leaflet gray tile rendering issues after display toggling.
+* **Feature 5: Safety & Legal Disclaimer Footer**
+  - *Low-Profile Mature Footer Layout*: A dedicated base footer section with a scale icon and clear disclaimer text displaying platform safety boundaries (explaining it's a prototype security assistant and not a replacement for official police emergency channels).
 
 ---
 
@@ -138,3 +144,16 @@ For absolute transparency and debugging:
 * **System Event Capture**: Tracks key milestones (e.g. startup, voice trigger hits, siren toggles, call simulations).
 * **Color-Coded Statuses**: Categorized into `SYSTEM`, `SAFETY`, `WARNING`, `CRITICAL`, and `RESOLVED` severity levels.
 * **Diagnostics Tab**: Toggleable within the Telemetry Uplink card using a lightweight JS event tab listener.
+
+#### 13. Tab Routing, Transitions & Scroll Resets
+To support multiple pages in a clean, single-page application structure:
+* **Dynamic Tab Swapping**: Clicking navigation tabs triggers the adding/removing of the `.hidden` class (`display: none !important;`) on `.dashboard-container` and `#about-section`.
+* **Sleek Fade-In Transitions**: When switching views, a slide-up fade-in transition (`pageFadeIn` animation) plays to animate the section elements into the viewport.
+* **Scroll-to-Top Reset**: Swapping tabs automatically triggers a `window.scrollTo({ top: 0, behavior: 'instant' })` and sets the scrollable containers' `.scrollTop = 0`, ensuring that the new page always displays starting from the top, just like a fresh page load.
+* **Leaflet Map Redraw**: When returning to the Dashboard view, the system calls `map.invalidateSize()` after a brief delay. This forces Leaflet to recalculate the map bounds, fixing the rendering canvas.
+
+#### 14. Safety & Legal Disclaimer Footer
+To show legal safety responsibility and platform maturity:
+* **Professional Legal Notice**: A permanent bottom footer clarifies that SafeSphere is a prototype safety platform, not a replacement for official police emergency dispatch lines, and advises dialling local emergency telephone lines in actual threat scenarios.
+* **Responsive Layout Grid**: The footer container adapts to different displays, rendering as a horizontal line on desktop and stacking as a column on mobile to fit the viewport seamlessly.
+
