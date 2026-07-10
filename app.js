@@ -1221,7 +1221,7 @@ function initStealthMode() {
 }
 
 /* ==========================================================================
-   12. LOW BATTERY STANDBY PROTOCOL
+   13. LOW BATTERY STANDBY PROTOCOL
    ========================================================================== */
 function initLowBatteryMode() {
   const simBtn = document.getElementById('simulate-low-battery');
@@ -1270,7 +1270,7 @@ function initLowBatteryMode() {
 }
 
 /* ==========================================================================
-   13. AUDIT TAB SWITCHING
+   14. AUDIT TAB SWITCHING
    ========================================================================== */
 function initAuditTabs() {
   const tabTelemetry = document.getElementById('tab-telemetry');
