@@ -60,6 +60,24 @@
     backdropFilter:  'blur(1px)',
   });
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     2. CURSOR SPOTLIGHT (soft ambient glow behind ring)
+  ══════════════════════════════════════════════════════════════════════════ */
+  const spotlight = document.createElement('div');
+  spotlight.id = 'cursor-spotlight';
+  Object.assign(spotlight.style, {
+    position:      'fixed',
+    pointerEvents: 'none',
+    zIndex:        '9990',
+    width:         '420px',
+    height:        '420px',
+    borderRadius:  '50%',
+    transform:     'translate(-50%, -50%)',
+    background:    'radial-gradient(circle, hsla(190,90%,50%,0.07) 0%, hsla(348,100%,61%,0.04) 45%, transparent 72%)',
+    transition:    'left 0.1s ease-out, top 0.1s ease-out',
+    mixBlendMode:  'screen',
+  });
+  document.body.appendChild(spotlight);
   document.body.appendChild(dot);
   document.body.appendChild(ring);
 
@@ -178,24 +196,7 @@
     ring.style.opacity = '1';
   });
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     2. CURSOR SPOTLIGHT (soft ambient glow behind ring)
-  ══════════════════════════════════════════════════════════════════════════ */
-  const spotlight = document.createElement('div');
-  spotlight.id = 'cursor-spotlight';
-  Object.assign(spotlight.style, {
-    position:      'fixed',
-    pointerEvents: 'none',
-    zIndex:        '9990',
-    width:         '420px',
-    height:        '420px',
-    borderRadius:  '50%',
-    transform:     'translate(-50%, -50%)',
-    background:    'radial-gradient(circle, hsla(190,90%,50%,0.07) 0%, hsla(348,100%,61%,0.04) 45%, transparent 72%)',
-    transition:    'left 0.1s ease-out, top 0.1s ease-out',
-    mixBlendMode:  'screen',
-  });
-  document.body.appendChild(spotlight);
+  /* Spotlight moved higher to avoid TDZ reference errors */
 
   /* 3D CARD TILT DISABLED */
 

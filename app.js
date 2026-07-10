@@ -152,10 +152,6 @@ function initSOS() {
     }
   };
 
-  // Expose to window for arrival check-in fallback
-  window.activateEmergencyBroadcast = activateEmergency;
-  window.deactivateEmergencyBroadcast = deactivateEmergency;
-
   const deactivateEmergency = () => {
     window.appState.sosActive = false;
     activeOverlay.classList.remove('show');
@@ -174,6 +170,10 @@ function initSOS() {
       window.mapModule.clearEmergencyOnMap();
     }
   };
+
+  // Expose to window for arrival check-in and voice activation fallback
+  window.activateEmergencyBroadcast = activateEmergency;
+  window.deactivateEmergencyBroadcast = deactivateEmergency;
 
   // Add event listeners
   sosTrigger.addEventListener('click', triggerSOSCountdown);
