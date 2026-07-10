@@ -24,28 +24,32 @@
 
 /* UI Panels Layout */
 .ui-panel {
-
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 500px;
-    background: var(--panel-bg);
+    width: 94%;
+    max-width: 540px;
+    background: hsla(222, 25%, 8%, 0.78);
+    border: 1px solid hsla(0, 0%, 100%, 0.08);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    padding: 12px 14px;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
     z-index: 1000; /* Stays above Leaflet map */
     color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s ease;
 }
 
 .top-panel {
-    top: 20px;
-    display: flex;
-    gap: 10px;
+    top: 14px;
 }
 
 .bottom-panel {
-    bottom: 30px;
+    bottom: 14px;
 }
 
 /* Inputs and Buttons */
@@ -95,3 +99,31 @@ button {
 .marker-pin.user { background: var(--color-cyan); }
 .marker-pin.safe { background: var(--color-emerald); border: 2px solid white; }
 .marker-pin.caution { background: var(--color-crimson); }
+
+/* Specific Overrides for TechFusion Dashboard Compatibility */
+.map-controls.ui-panel {
+    border-bottom: 1px solid hsla(0, 0%, 100%, 0.08);
+    background: hsla(222, 25%, 8%, 0.78) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+}
+
+.map-controls.ui-panel .search-box {
+    width: 100%;
+}
+
+.map-controls.ui-panel .map-legends {
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.transit-progress-container.ui-panel {
+    border-top: 1px solid hsla(0, 0%, 100%, 0.08);
+    background: hsla(222, 25%, 8%, 0.78) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
