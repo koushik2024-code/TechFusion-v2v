@@ -635,20 +635,30 @@ function logTelemetryEntry(type, coords, speed, battery) {
     entry.classList.add('offline-log-entry');
   }
 
-  // Format coordinates cleanly if it's a number pair
-  let coordsHTML = `<span class="log-coordinate">${coords}</span>`;
-  
+  // Create spans securely via textContent to prevent HTML injection (XSS)
+  const spanTime = document.createElement('span');
+  spanTime.textContent = timestamp;
+
+  const spanCoords = document.createElement('span');
+  spanCoords.className = 'log-coordinate';
+  spanCoords.textContent = coords;
+
+  const spanSpeed = document.createElement('span');
+  spanSpeed.textContent = speed;
+
+  const spanBattery = document.createElement('span');
   let syncStatusText = battery;
   if (isOfflineData) {
     syncStatusText = "QUEUED";
+    spanBattery.style.color = "var(--color-amber)";
+    spanBattery.style.fontWeight = "bold";
   }
+  spanBattery.textContent = syncStatusText;
 
-  entry.innerHTML = `
-    <span>${timestamp}</span>
-    ${coordsHTML}
-    <span>${speed}</span>
-    <span style="${isOfflineData ? 'color: var(--color-amber); font-weight: bold;' : ''}">${syncStatusText}</span>
-  `;
+  entry.appendChild(spanTime);
+  entry.appendChild(spanCoords);
+  entry.appendChild(spanSpeed);
+  entry.appendChild(spanBattery);
 
   // Prepend to show latest at top
   container.insertBefore(entry, container.firstChild);
@@ -698,15 +708,24 @@ function initContactsEditor() {
   });
 
   saveBtn.addEventListener('click', () => {
-    // Update main layout text
-    displayPName.textContent = inputPName.value;
-    displayPPhone.textContent = inputPPhone.value;
-    displaySName.textContent = inputSName.value;
-    displaySPhone.textContent = inputSPhone.value;
+    // Input sanitizers to prevent DOM XSS and HTML injection
+    const cleanPhone = (val) => val.replace(/[^\d+()\-\s]/g, '').trim();
+    const cleanName = (val) => val.replace(/[<>]/g, '').trim(); // Remove brackets to block HTML tags
 
-    // Update clickable links
-    displayPName.parentElement.nextElementSibling.setAttribute('href', `tel:${inputPPhone.value.replace(/\s+/g, '')}`);
-    displaySName.parentElement.nextElementSibling.setAttribute('href', `tel:${inputSPhone.value.replace(/\s+/g, '')}`);
+    const sanitizedPName = cleanName(inputPName.value);
+    const sanitizedPPhone = cleanPhone(inputPPhone.value);
+    const sanitizedSName = cleanName(inputSName.value);
+    const sanitizedSPhone = cleanPhone(inputSPhone.value);
+
+    // Update main layout text safely
+    displayPName.textContent = sanitizedPName;
+    displayPPhone.textContent = sanitizedPPhone;
+    displaySName.textContent = sanitizedSName;
+    displaySPhone.textContent = sanitizedSPhone;
+
+    // Update clickable links using sanitized tel numbers to avoid protocol-handler XSS
+    displayPName.parentElement.nextElementSibling.setAttribute('href', `tel:${sanitizedPPhone.replace(/\s+/g, '')}`);
+    displaySName.parentElement.nextElementSibling.setAttribute('href', `tel:${sanitizedSPhone.replace(/\s+/g, '')}`);
 
     modalOverlay.classList.remove('show');
     logTelemetryEntry("Contacts", "Guardian Info Updated", "--", "--");
