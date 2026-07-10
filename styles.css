@@ -1750,3 +1750,147 @@ body {
   background-color: hsla(48, 100%, 60%, 0.04) !important;
 }
 
+/* Safe Arrival Verification UI */
+.arrival-verification-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: hsla(140, 71%, 48%, 0.12);
+  border: 1px solid hsla(140, 71%, 48%, 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  animation: pulse-border-emerald 1.5s infinite alternate;
+}
+
+@keyframes pulse-border-emerald {
+  0% {
+    border-color: hsla(140, 71%, 48%, 0.2);
+    box-shadow: 0 0 4px rgba(35, 209, 96, 0.1);
+  }
+  100% {
+    border-color: hsla(140, 71%, 48%, 0.6);
+    box-shadow: 0 0 10px rgba(35, 209, 96, 0.3);
+  }
+}
+
+.verification-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.verification-label i {
+  width: 14px;
+  height: 14px;
+  color: var(--color-crimson);
+  animation: blink-anim 1s infinite;
+}
+
+.verification-label b {
+  color: var(--color-crimson);
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.im-safe-btn {
+  background: var(--color-emerald);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 0 6px var(--color-emerald-glow);
+}
+
+.im-safe-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px var(--color-emerald);
+}
+
+.im-safe-btn:active {
+  transform: scale(0.95);
+}
+
+.im-safe-btn i {
+  width: 14px;
+  height: 14px;
+}
+
+/* Community Hazard Report Trigger & Options */
+.report-hazard-btn {
+  background: hsla(348, 100%, 61%, 0.1);
+  border: 1px solid hsla(348, 100%, 61%, 0.3);
+  color: var(--color-crimson);
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.report-hazard-btn:hover {
+  background: hsla(348, 100%, 61%, 0.2);
+  border-color: var(--color-crimson);
+  transform: translateY(-1px);
+}
+
+.report-hazard-btn:active {
+  transform: translateY(1px);
+}
+
+.report-hazard-btn i {
+  width: 14px;
+  height: 14px;
+}
+
+.hazard-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.hazard-opt {
+  background: hsla(0, 0%, 100%, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  width: 100%;
+}
+
+.hazard-opt:hover {
+  background: hsla(348, 100%, 61%, 0.15);
+  border-color: hsla(348, 100%, 61%, 0.4);
+  color: var(--color-crimson);
+}
+
+.hazard-opt i {
+  width: 14px;
+  height: 14px;
+}
+
