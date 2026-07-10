@@ -4,39 +4,38 @@
 
 /* 1. Global Reset & Variables */
 :root {
-  /* Color Palette (HSL for premium theme control) */
+  /* Color Palette */
   --bg-dark: hsl(222, 24%, 6%);
   --bg-card: hsla(222, 20%, 10%, 0.55);
   --bg-card-hover: hsla(222, 20%, 15%, 0.7);
-  
+
   --border-glass: hsla(0, 0%, 100%, 0.08);
   --border-glass-glow: hsla(0, 0%, 100%, 0.18);
-  
+
   --color-crimson: hsl(348, 100%, 61%);
   --color-crimson-glow: hsla(348, 100%, 61%, 0.35);
-  
   --color-emerald: hsl(140, 71%, 48%);
   --color-emerald-glow: hsla(140, 71%, 48%, 0.3);
-  
   --color-amber: hsl(48, 100%, 60%);
   --color-amber-glow: hsla(48, 100%, 60%, 0.3);
-  
   --color-cyan: hsl(190, 90%, 50%);
   --color-cyan-glow: hsla(190, 90%, 50%, 0.25);
-  
+
   --text-primary: hsl(210, 20%, 98%);
   --text-secondary: hsl(215, 15%, 75%);
   --text-muted: hsl(215, 12%, 55%);
-  
-  /* Layout Settings */
+
   --header-height: 70px;
   --footer-height: 52px;
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
-  /* Fonts */
+
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Mouse tracking variables (updated by effects.js) */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 
 * {
@@ -53,15 +52,83 @@ body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  background-image: 
-    radial-gradient(circle at 10% 20%, hsla(348, 60%, 20%, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, hsla(190, 60%, 20%, 0.12) 0%, transparent 45%),
-    radial-gradient(circle at 50% 50%, hsla(222, 30%, 8%, 1) 0%, var(--bg-dark) 100%);
+  background-image:
+    radial-gradient(hsla(190, 90%, 50%, 0.08) 1.2px, transparent 1.2px),
+    radial-gradient(hsla(270, 90%, 50%, 0.05) 1.8px, transparent 1.8px),
+    radial-gradient(circle at var(--mouse-x) var(--mouse-y), hsla(190, 90%, 50%, 0.04) 0%, transparent 60%),
+    radial-gradient(circle at 15% 15%, hsla(348, 60%, 25%, 0.15) 0%, transparent 45%),
+    radial-gradient(circle at 85% 85%, hsla(270, 70%, 25%, 0.12) 0%, transparent 45%),
+    linear-gradient(135deg, hsl(222, 24%, 6%) 0%, hsl(222, 28%, 3%) 100%);
+  background-size: 30px 30px, 60px 60px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   background-attachment: fixed;
 }
 
 .hidden {
   display: none !important;
+}
+
+/* Animated background orbs */
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  transition: transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+.bg-orb-1 {
+  width: 600px;
+  height: 600px;
+  top: -150px;
+  left: -150px;
+  background: radial-gradient(circle, hsla(348, 100%, 55%, 0.14) 0%, transparent 70%);
+  animation: orb-float-1 18s ease-in-out infinite alternate;
+}
+
+.bg-orb-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -100px;
+  right: -100px;
+  background: radial-gradient(circle, hsla(190, 90%, 50%, 0.14) 0%, transparent 70%);
+  animation: orb-float-2 22s ease-in-out infinite alternate;
+}
+
+.bg-orb-3 {
+  width: 400px;
+  height: 400px;
+  top: 45%;
+  left: 40%;
+  background: radial-gradient(circle, hsla(270, 90%, 60%, 0.08) 0%, transparent 70%);
+  animation: orb-float-3 15s ease-in-out infinite alternate;
+}
+
+@keyframes orb-float-1 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(80px, 60px) scale(1.1); }
+  66%  { transform: translate(40px, 120px) scale(0.95); }
+  100% { transform: translate(120px, 30px) scale(1.05); }
+}
+
+@keyframes orb-float-2 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  33%  { transform: translate(-90px, -50px) scale(1.08); }
+  66%  { transform: translate(-40px, -100px) scale(0.92); }
+  100% { transform: translate(-110px, -20px) scale(1.12); }
+}
+
+@keyframes orb-float-3 {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  50%  { transform: translate(-60px, 80px) scale(1.15); }
+  100% { transform: translate(70px, -60px) scale(0.88); }
+}
+
+/* Glass cards get smooth 3D transition prep */
+.glass-card {
+  transition: transform 0.4s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.4s;
+  will-change: transform;
 }
 
 /* Scrollbar styling */
@@ -755,125 +822,241 @@ body {
 .action-card {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
-  gap: 14px;
-  border-radius: 12px;
+  padding: 14px 16px;
+  gap: 12px;
+  border-radius: 14px;
+  background: hsla(220, 25%, 12%, 0.6);
+  border: 1px solid hsla(0, 0%, 100%, 0.06);
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
 }
 
+.action-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, hsla(0,0%,100%,0.03), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.action-card:hover {
+  background: hsla(220, 25%, 16%, 0.7);
+  border-color: hsla(0, 0%, 100%, 0.12);
+}
+
+/* Right-side controls wrapper */
+.action-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Icon box */
 .action-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border-glass);
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+/* Fix: size Font Awesome icons inside action-icon */
+.action-icon i {
+  font-size: 18px !important;
+  line-height: 1;
+  display: block;
+  text-align: center;
+}
+/* Keep SVG fallback sizing too */
+.action-icon svg {
+  width: 22px !important;
+  height: 22px !important;
+  stroke-width: 2;
+  display: block;
 }
 
 .action-icon.siren {
-  background: rgba(255, 221, 87, 0.1);
-  color: var(--color-amber);
+  background: linear-gradient(135deg, hsla(48, 100%, 55%, 0.30), hsla(48, 100%, 55%, 0.15));
+  border-color: hsla(48, 100%, 55%, 0.5);
+  color: hsl(48, 100%, 65%);
+  box-shadow: 0 0 12px hsla(48, 100%, 55%, 0.2);
 }
 
 .action-icon.siren.active {
   background: var(--color-crimson);
+  border-color: var(--color-crimson);
   color: white;
+  box-shadow: 0 0 16px var(--color-crimson-glow);
   animation: blink-red-blue 0.5s infinite alternate;
 }
 
 .action-icon.fakecall {
-  background: rgba(35, 209, 96, 0.1);
-  color: var(--color-emerald);
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.30), hsla(140, 71%, 48%, 0.15));
+  border-color: hsla(140, 71%, 48%, 0.5);
+  color: hsl(140, 71%, 62%);
+  box-shadow: 0 0 12px hsla(140, 71%, 48%, 0.2);
 }
 
 .action-icon.recorder {
-  background: rgba(32, 156, 238, 0.1);
-  color: var(--color-cyan);
+  background: linear-gradient(135deg, hsla(190, 90%, 50%, 0.30), hsla(190, 90%, 50%, 0.15));
+  border-color: hsla(190, 90%, 50%, 0.5);
+  color: hsl(190, 90%, 65%);
+  box-shadow: 0 0 12px hsla(190, 90%, 50%, 0.2);
 }
 
 .action-icon.recorder.recording {
-  background: rgba(255, 56, 96, 0.15);
+  background: linear-gradient(135deg, hsla(348, 100%, 61%, 0.35), hsla(348, 100%, 61%, 0.15));
+  border-color: hsla(348, 100%, 61%, 0.6);
   color: var(--color-crimson);
+  box-shadow: 0 0 16px var(--color-crimson-glow);
+  animation: pulse-border 1.2s infinite;
+}
+
+.action-icon.voice {
+  background: linear-gradient(135deg, hsla(270, 90%, 50%, 0.30), hsla(270, 90%, 50%, 0.15));
+  border-color: hsla(270, 90%, 50%, 0.5);
+  color: hsl(270, 90%, 65%);
+  box-shadow: 0 0 12px hsla(270, 90%, 50%, 0.2);
+}
+
+.action-icon.voice.listening {
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.35), hsla(140, 71%, 48%, 0.15));
+  border-color: hsla(140, 71%, 48%, 0.6);
+  color: var(--color-emerald);
+  box-shadow: 0 0 16px var(--color-emerald-glow);
   animation: pulse-border 1.2s infinite;
 }
 
 .action-info {
   flex: 1;
+  min-width: 0;
 }
 
 .action-info h3 {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #ffffff !important;
+  margin-bottom: 3px;
+  letter-spacing: 0.01em;
 }
 
 .action-info p {
   font-size: 0.72rem;
-  color: var(--text-muted);
-  margin-top: 1px;
+  color: hsl(215, 15%, 70%) !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Toggle switch styling */
+/* Toggle switch */
 .action-toggle-btn {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: hsla(0, 0%, 100%, 0.1);
-  border: 1px solid var(--border-glass);
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  background: hsla(0, 0%, 100%, 0.08);
+  border: 1px solid hsla(0, 0%, 100%, 0.12);
   position: relative;
   cursor: pointer;
-  transition: background 0.25s;
+  flex-shrink: 0;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .action-toggle-btn.active {
-  background: var(--color-crimson);
-  border-color: var(--color-crimson);
+  background: linear-gradient(135deg, hsl(348, 100%, 55%), hsl(348, 90%, 45%));
+  border-color: hsl(348, 100%, 55%);
+  box-shadow: 0 0 14px hsla(348, 100%, 61%, 0.4);
 }
 
 .toggle-slider {
   position: absolute;
-  top: 2px; left: 2px;
-  width: 18px;
-  height: 18px;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: white;
-  transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  transition: transform 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .action-toggle-btn.active .toggle-slider {
   transform: translateX(20px);
 }
 
-/* Simple icon trigger button styling */
+/* Trigger play/record button - colored per widget type */
 .action-trigger-btn {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: hsla(0, 0%, 100%, 0.05);
-  border: 1px solid var(--border-glass);
-  color: var(--text-secondary);
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.25), hsla(140, 71%, 48%, 0.1));
+  border: 1px solid hsla(140, 71%, 48%, 0.4);
+  color: hsl(140, 71%, 62%);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 0 10px hsla(140, 71%, 48%, 0.15);
+}
+
+/* Record button (red) */
+#trigger-record {
+  background: linear-gradient(135deg, hsla(348, 100%, 61%, 0.25), hsla(348, 100%, 61%, 0.1));
+  border-color: hsla(348, 100%, 61%, 0.45);
+  color: var(--color-crimson);
+  box-shadow: 0 0 10px hsla(348, 100%, 61%, 0.2);
 }
 
 .action-trigger-btn:hover {
-  background: hsla(0, 0%, 100%, 0.15);
-  color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 18px hsla(140, 71%, 48%, 0.35);
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.40), hsla(140, 71%, 48%, 0.2));
 }
 
+#trigger-record:hover {
+  box-shadow: 0 0 18px hsla(348, 100%, 61%, 0.4);
+  background: linear-gradient(135deg, hsla(348, 100%, 61%, 0.40), hsla(348, 100%, 61%, 0.2));
+}
+
+.action-trigger-btn:active {
+  transform: scale(0.92);
+}
+
+/* Font Awesome icon inside trigger button */
+.action-trigger-btn i {
+  font-size: 13px !important;
+  line-height: 1;
+  display: block;
+}
+
+.action-trigger-btn svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 2.5;
+  display: block;
+}
+
+/* Red record dot */
 .record-dot {
-  width: 10px;
-  height: 10px;
+  display: block;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
-  background-color: var(--color-crimson);
+  background: var(--color-crimson);
+  box-shadow: 0 0 10px rgba(255,56,96,0.7);
   transition: transform 0.2s;
 }
 
 .action-icon.recorder.recording + .action-info + .action-trigger-btn .record-dot {
-  transform: scale(1.3);
+  transform: scale(1.4);
   animation: pulse-active 1s infinite alternate;
 }
 
@@ -927,35 +1110,39 @@ body {
 
 .score-badge {
   display: inline-block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 20px;
   margin-bottom: 8px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .score-badge.safe {
-  background: rgba(35, 209, 96, 0.15);
-  color: var(--color-emerald);
-  border: 1px solid var(--color-emerald);
+  background: hsla(140, 71%, 48%, 0.20);
+  color: hsl(140, 71%, 68%) !important;
+  border: 1px solid hsla(140, 71%, 48%, 0.5);
+  box-shadow: 0 0 10px hsla(140, 71%, 48%, 0.15);
 }
 
 .score-badge.warning {
-  background: rgba(255, 221, 87, 0.15);
-  color: var(--color-amber);
-  border: 1px solid var(--color-amber);
+  background: hsla(48, 100%, 60%, 0.20);
+  color: hsl(48, 100%, 70%) !important;
+  border: 1px solid hsla(48, 100%, 60%, 0.5);
 }
 
 .score-badge.danger {
-  background: rgba(255, 56, 96, 0.15);
-  color: var(--color-crimson);
-  border: 1px solid var(--color-crimson);
+  background: hsla(348, 100%, 61%, 0.20);
+  color: hsl(348, 100%, 75%) !important;
+  border: 1px solid hsla(348, 100%, 61%, 0.5);
 }
 
 .score-desc {
-  font-size: 0.74rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
+  font-size: 0.76rem;
+  color: hsl(215, 15%, 75%) !important;
+  line-height: 1.5;
+  padding: 0 4px;
 }
 
 /* 5. Center Panel - Map Styling */
@@ -1367,6 +1554,17 @@ body {
   color: var(--color-crimson);
 }
 
+.contact-avatar.whatsapp {
+  background: rgba(37, 211, 102, 0.12);
+  color: #25d366;
+}
+
+.contact-avatar i.fa-brands {
+  width: auto;
+  height: auto;
+  font-size: 15px;
+}
+
 .contact-details {
   flex: 1;
 }
@@ -1407,6 +1605,18 @@ body {
   background: var(--color-crimson);
   color: white;
   border-color: var(--color-crimson);
+}
+
+.call-icon-btn.whatsapp:hover {
+  background: #25d366;
+  color: white;
+  border-color: #25d366;
+}
+
+.call-icon-btn i.fa-brands {
+  width: auto;
+  height: auto;
+  font-size: 15px;
 }
 
 .call-icon-btn i {
@@ -1723,6 +1933,20 @@ body {
 
 /* 9. Responsive Breakpoints */
 @media (max-width: 1100px) {
+  .dashboard-header {
+    height: auto;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 20px;
+    align-items: center;
+    text-align: center;
+  }
+  .header-stats {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
   .dashboard-container {
     grid-template-columns: 300px 1fr;
     height: auto;
@@ -1920,8 +2144,8 @@ body {
 
 .hazard-options {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   margin-top: 10px;
 }
 
@@ -2293,5 +2517,183 @@ body {
   animation: pageFadeIn 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
+/* Lucide SVG Icons Compatibility Styles (Fixes invisible or shrunk icons) */
+.logo-icon-glow svg { width: 22px; height: 22px; }
+.git-checkin-tracker svg { width: 14px; height: 14px; }
+.connectivity-status svg { width: 14px; height: 14px; }
+.emergency-action-btn svg { width: 48px; height: 48px; stroke-width: 2.2; }
+.deactivate-sos-btn svg { width: 24px; height: 24px; }
+.route-btn svg { width: 14px; height: 14px; }
+.transit-step svg { width: 14px; height: 14px; }
+.progress-avatar svg { width: 12px; height: 12px; }
+.edit-btn svg { width: 16px; height: 16px; }
+.contact-avatar svg { width: 16px; height: 16px; }
+.call-icon-btn svg { width: 14px; height: 14px; }
+.security-badge svg { width: 12px; height: 12px; }
+.caller-avatar svg { width: 50px; height: 50px; }
+.call-btn svg { width: 28px; height: 28px; }
+.marker-pin svg { width: 14px; height: 14px; }
+.verification-label svg { width: 14px; height: 14px; }
+.im-safe-btn svg { width: 14px; height: 14px; }
+.report-hazard-btn svg { width: 14px; height: 14px; }
+.hazard-opt svg { width: 14px; height: 14px; }
+.action-trigger-btn svg { width: 16px; height: 16px; }
 
+/* ── Stealth Mode Toggle Button ────────────────────────────────────────── */
+.stealth-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
 
+.stealth-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border-color: var(--color-cyan);
+}
+
+.stealth-toggle-btn.active {
+  background: rgba(255, 56, 96, 0.15);
+  color: #ff3860;
+  border-color: #ff3860;
+  box-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
+}
+
+.stealth-toggle-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+/* ── Stealth / Blackout Mode Styles ─────────────────────────────────────── */
+body.stealth-active {
+  filter: brightness(0.6) contrast(1.1);
+  background: #000000 !important;
+}
+
+body.stealth-active .bg-orb {
+  display: none !important;
+}
+
+body.stealth-active #map {
+  filter: invert(1) hue-rotate(180deg) brightness(0.4) contrast(1.4) !important;
+}
+
+body.stealth-active .glass-card {
+  background: rgba(0, 0, 0, 0.96) !important;
+  border-color: rgba(255, 56, 96, 0.2) !important;
+  box-shadow: none !important;
+}
+
+body.stealth-active .glass-card::after {
+  background: linear-gradient(90deg, #ff3860, transparent) !important;
+}
+
+body.stealth-active .logo-icon-glow {
+  background: #ff3860 !important;
+  box-shadow: none !important;
+}
+
+body.stealth-active .logo-text h1 span {
+  background: none !important;
+  -webkit-text-fill-color: initial !important;
+  color: #ff3860 !important;
+}
+
+body.stealth-active .logo-text h1 {
+  color: #888 !important;
+}
+
+/* ── Tabbed Log Panel Styles ────────────────────────────────────────────── */
+.log-tab {
+  opacity: 0.6;
+  border-bottom: 2px solid transparent !important;
+}
+
+.log-tab:hover {
+  opacity: 0.9;
+}
+
+.log-tab.active {
+  opacity: 1 !important;
+  color: white !important;
+  border-bottom: 2px solid var(--color-cyan) !important;
+}
+
+/* ── Audit Trail / System Event Log ─────────────────────────────────────── */
+.audit-entry {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  font-family: monospace;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  border-left: 3px solid #666;
+}
+
+.audit-entry.severity-system {
+  border-left-color: var(--color-cyan);
+}
+
+.audit-entry.severity-safety {
+  border-left-color: var(--color-emerald);
+}
+
+.audit-entry.severity-warning {
+  border-left-color: var(--color-amber);
+  color: var(--color-amber);
+}
+
+.audit-entry.severity-critical {
+  border-left-color: #ff3860;
+  color: #ff3860;
+  animation: logPulse 2s infinite alternate;
+}
+
+.audit-entry.severity-resolved {
+  border-left-color: var(--color-emerald);
+  color: var(--color-emerald);
+}
+
+.audit-badge {
+  font-size: 0.58rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.badge-system { color: var(--color-cyan); }
+.badge-safety { color: var(--color-emerald); }
+.badge-warning { color: var(--color-amber); }
+.badge-critical { color: #ff3860; background: rgba(255, 56, 96, 0.15); }
+.badge-resolved { color: var(--color-emerald); }
+
+@keyframes logPulse {
+  0% { background: rgba(255, 56, 96, 0.02); }
+  100% { background: rgba(255, 56, 96, 0.1); }
+}
+
+/* ── Low Battery Banner Animation ───────────────────────────────────────── */
+.low-battery-banner {
+  animation: bannerSlideDown 0.5s ease-out;
+}
+
+@keyframes bannerSlideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}

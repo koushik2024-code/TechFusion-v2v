@@ -14,10 +14,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Leaflet CSS for Dark Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="styles.css">
+  <!-- Font Awesome 6 - CSS-based icons, always reliable -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
+  <!-- Custom CSS (Cache Busted) -->
+  <link rel="stylesheet" href="styles.css?v=3.2.0">
+  <link rel="stylesheet" href="design-map-overlay.css?v=3.2.0">
 </head>
 <body>
+  <!-- Low Battery Mode Alert Banner -->
+  <div class="low-battery-banner" id="low-battery-alert" style="display: none; background: linear-gradient(90deg, #ff3860, #ff8a00); color: white; text-align: center; padding: 8px 12px; font-size: 0.8rem; font-weight: bold; font-family: var(--font-body); z-index: 1001; position: relative; border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+    ⚠️ CRITICAL: Low Battery Mode Active (&lt;15%). Last known coordinates broadcasted to guardians. System in power saving mode.
+  </div>
+
+  <!-- Animated Background Orbs (parallax-tracked by effects.js) -->
+  <div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+
   <!-- Header Bar -->
   <header class="dashboard-header">
     <div class="header-logo">
@@ -26,7 +39,7 @@
       </div>
       <div class="logo-text">
         <h1>SHAKTHI <span>SAFESPHERE</span></h1>
-        <p class="subtitle">Hackathon Edition v2v</p>
+        <p class="subtitle">v3.1.1 — Hackathon Edition</p>
       </div>
     </div>
     
@@ -55,6 +68,11 @@
         <i data-lucide="cloud"></i>
         <span id="connection-text">Sync: Connected</span>
       </div>
+      <!-- Stealth Mode Toggle Button -->
+      <button class="stealth-toggle-btn" id="stealth-toggle" title="Toggle Low-Light Stealth Mode (Dims screen for protection)">
+        <i data-lucide="eye-off"></i>
+        <span>Stealth Mode</span>
+      </button>
       <div class="clock-display" id="system-clock">
         00:00:00 PM
       </div>
@@ -90,48 +108,69 @@
         <!-- Alarm Siren Widget -->
         <div class="glass-card action-card" id="widget-siren">
           <div class="action-icon siren">
-            <i data-lucide="volume-2"></i>
+            <i class="fa-solid fa-bullhorn"></i>
           </div>
           <div class="action-info">
             <h3>Siren Alarm</h3>
             <p id="siren-status-text">Inactive</p>
           </div>
-          <button class="action-toggle-btn" id="toggle-siren">
-            <span class="toggle-slider"></span>
-          </button>
+          <div class="action-controls">
+            <button class="action-toggle-btn" id="toggle-siren">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
         </div>
 
         <!-- Fake Call Widget -->
         <div class="glass-card action-card" id="widget-fakecall">
           <div class="action-icon fakecall">
-            <i data-lucide="phone-call"></i>
+            <i class="fa-solid fa-phone-volume"></i>
           </div>
           <div class="action-info">
             <h3>Fake Call</h3>
-            <p id="shake-status-text">Shake to Trigger: OFF</p>
+            <p id="shake-status-text">Shake: OFF</p>
           </div>
-          <!-- Toggle Shake Call Switch -->
-          <button class="action-toggle-btn" id="toggle-shake-call" title="Enable Shake to Activate Fake Call">
-            <span class="toggle-slider"></span>
-          </button>
-          <!-- Trigger Instantly -->
-          <button class="action-trigger-btn" id="trigger-fakecall" title="Simulate Call Instantly">
-            <i data-lucide="chevron-right"></i>
-          </button>
+          <div class="action-controls">
+            <button class="action-toggle-btn" id="toggle-shake-call" title="Shake to Activate">
+              <span class="toggle-slider"></span>
+            </button>
+            <button class="action-trigger-btn" id="trigger-fakecall" title="Trigger Call Now">
+              <i class="fa-solid fa-play"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Audio Recording Widget -->
         <div class="glass-card action-card" id="widget-recorder">
           <div class="action-icon recorder">
-            <i data-lucide="mic"></i>
+            <i class="fa-solid fa-microphone"></i>
           </div>
           <div class="action-info">
             <h3>Audio Vault</h3>
             <p id="record-status-text">Ready</p>
+            <canvas id="audio-wave-canvas" style="display: none; width: 100px; height: 16px; margin-top: 4px; border-radius: 4px;"></canvas>
           </div>
-          <button class="action-trigger-btn" id="trigger-record">
-            <span class="record-dot"></span>
-          </button>
+          <div class="action-controls">
+            <button class="action-trigger-btn" id="trigger-record" title="Start Recording">
+              <span class="record-dot"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Voice Trigger Widget -->
+        <div class="glass-card action-card" id="widget-voice">
+          <div class="action-icon voice">
+            <i class="fa-solid fa-volume-high"></i>
+          </div>
+          <div class="action-info">
+            <h3>Voice Guardian</h3>
+            <p id="voice-status-text">Voice Trigger: OFF</p>
+          </div>
+          <div class="action-controls">
+            <button class="action-toggle-btn" id="toggle-voice-trigger" title="Voice Activated SOS Alert">
+              <span class="toggle-slider"></span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -188,7 +227,7 @@
     <!-- CENTER PANEL: Navigation Map -->
     <section class="panel center-panel">
       <div class="glass-card map-card">
-        <div class="map-controls">
+        <div class="map-controls ui-panel top-panel">
           <div class="search-box">
             <i data-lucide="search" class="search-icon"></i>
             <input type="text" id="route-destination" placeholder="Search destination for safe routing (e.g. Hostels, Library)..." value="CBIT Main Library">
@@ -207,7 +246,7 @@
         <div id="map"></div>
 
         <!-- Simulated Transit routing bar -->
-        <div class="transit-progress-container" id="transit-bar">
+        <div class="transit-progress-container ui-panel bottom-panel" id="transit-bar">
           <div class="transit-info">
             <div class="transit-step">
               <i data-lucide="milestone"></i>
@@ -243,6 +282,7 @@
             <div class="metric-data">
               <span class="metric-label">Battery</span>
               <span class="metric-val" id="metric-battery">98%</span>
+              <span id="simulate-low-battery" style="display: block; font-size: 0.58rem; color: var(--color-cyan); cursor: pointer; text-decoration: underline; margin-top: 2px;" title="Test Low Battery mode for judges">Simulate Low</span>
             </div>
           </div>
           <div class="metric-item">
@@ -267,15 +307,22 @@
             </div>
           </div>
         </div>
+        <!-- Real-Time Telemetry Line Chart -->
+        <div class="chart-container" style="margin-top: 14px; height: 60px; position: relative; border: 1px solid var(--border-glass); border-radius: 8px; overflow: hidden; background: rgba(0, 0, 0, 0.15);">
+          <canvas id="telemetry-chart" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
       </div>
 
-      <!-- Real-Time Passive Telemetry Log -->
+      <!-- Real-Time Passive Telemetry & Event Log -->
       <div class="glass-card telemetry-card">
-        <div class="card-header">
-          <h3>Telemetry Uplink</h3>
-          <span class="badge blink">LIVE FEED</span>
+        <div class="card-header telemetry-header-tabs" style="display: flex; gap: 8px; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 8px; margin-bottom: 10px;">
+          <button class="log-tab active" id="tab-telemetry" style="background: none; border: none; color: white; font-weight: 700; font-size: 0.8rem; cursor: pointer; opacity: 1; padding: 4px 6px; border-bottom: 2px solid var(--color-cyan); transition: all 0.2s;">Telemetry</button>
+          <button class="log-tab" id="tab-audit" style="background: none; border: none; color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; cursor: pointer; opacity: 0.6; padding: 4px 6px; border-bottom: 2px solid transparent; transition: all 0.2s;">Event Log</button>
+          <span class="badge blink" style="margin-left: auto;">LIVE FEED</span>
         </div>
-        <div class="telemetry-log" id="telemetry-log-container">
+        
+        <!-- Live Telemetry Stream Grid -->
+        <div class="telemetry-log" id="telemetry-log-container" style="display: block;">
           <div class="log-row header-row">
             <span>Time</span>
             <span>Coordinates</span>
@@ -284,6 +331,18 @@
           </div>
           <div class="log-entries" id="telemetry-entries">
             <!-- Simulated logs will be appended here by JS -->
+          </div>
+        </div>
+
+        <!-- System Event Log / Audit Trail -->
+        <div class="audit-log" id="audit-log-container" style="display: none; height: 160px; overflow-y: auto;">
+          <div class="log-row header-row-audit" style="display: grid; grid-template-columns: 80px 1fr 60px; font-weight: bold; border-bottom: 1px solid var(--border-glass); padding-bottom: 6px; font-size: 0.72rem; color: var(--text-secondary);">
+            <span>Time</span>
+            <span>System Event / Audit Trail</span>
+            <span>Status</span>
+          </div>
+          <div class="log-entries" id="audit-entries" style="display: flex; flex-direction: column; gap: 4px; padding-top: 6px;">
+            <!-- Audit logs will be appended here by JS -->
           </div>
         </div>
       </div>
@@ -334,6 +393,16 @@
               <p>112 / 100</p>
             </div>
             <a href="tel:112" class="call-icon-btn emergency"><i data-lucide="phone"></i></a>
+          </div>
+
+          <!-- SHE Team WhatsApp Helpline -->
+          <div class="contact-card helpline">
+            <div class="contact-avatar whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="contact-details">
+              <h4>Connect with SHE Team</h4>
+              <p>+91 63048 54034 (WhatsApp)</p>
+            </div>
+            <a href="https://wa.me/916304854034?text=SafeSphere%20Emergency%20Alert:%20Need%20Assistance" target="_blank" class="call-icon-btn whatsapp" title="Connect on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
           </div>
         </div>
 
@@ -574,12 +643,14 @@
     </button>
   </div>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Icons (Version Pinned for Security) -->
+  <script src="https://unpkg.com/lucide@0.407.0/dist/umd/lucide.min.js"></script>
   <!-- Leaflet JS Library -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <!-- Custom Application Scripts -->
-  <script src="app.js"></script>
-  <script src="map.js"></script>
+  <!-- Custom Application Scripts (Cache Busted) -->
+  <script src="app.js?v=3.2.0"></script>
+  <script src="map.js?v=3.2.0"></script>
+  <!-- Advanced UI Effects: mouse tracking, particles, card tilt -->
+  <script src="effects.js?v=3.2.0"></script>
 </body>
 </html>
