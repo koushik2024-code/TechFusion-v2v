@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSiren();
   initFakeCall();
   initAudioVault();
+  initVoiceTrigger();
   initTelemetryLog();
   initContactsEditor();
   initConnectivityMonitor();
@@ -547,6 +548,108 @@ function initAudioVault() {
           recordStatus.style.color = "";
         }
       }, 3000);
+    }
+  });
+}
+
+/* ==========================================================================
+   5.5 VOICE ACTIVATION GUARDIAN (Web Speech API)
+   ========================================================================== */
+function initVoiceTrigger() {
+  const toggleBtn = document.getElementById('toggle-voice-trigger');
+  const voiceWidget = document.getElementById('widget-voice');
+  const voiceStatus = document.getElementById('voice-status-text');
+  const icon = voiceWidget.querySelector('.action-icon');
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isActive = false;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      voiceStatus.textContent = "Listening: 'Help' / 'SOS'";
+      voiceStatus.style.color = "var(--color-emerald)";
+      icon.classList.add('listening');
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error", event.error);
+      if (event.error === 'not-allowed') {
+        voiceStatus.textContent = "Mic Permission Denied";
+        voiceStatus.style.color = "var(--color-crimson)";
+        deactivateVoice();
+      }
+    };
+
+    recognition.onend = () => {
+      if (isActive) {
+        try { recognition.start(); } catch (e) {}
+      } else {
+        voiceStatus.textContent = "Voice Trigger: OFF";
+        voiceStatus.style.color = "";
+        icon.classList.remove('listening');
+      }
+    };
+
+    recognition.onresult = (event) => {
+      const resultIndex = event.resultIndex;
+      const transcript = event.results[resultIndex][0].transcript.toLowerCase();
+      console.log("Voice Transcript:", transcript);
+
+      const triggerKeywords = ["help", "emergency", "siren", "shakthi", "sos", "save me", "help me", "alert"];
+      const hasKeyword = triggerKeywords.some(keyword => transcript.includes(keyword));
+
+      if (hasKeyword) {
+        logTelemetryEntry("Safety", `Voice Trigger Detected: "${transcript.trim()}"`, "--", "ALERT");
+        // Trigger emergency directly
+        const sosTrigger = document.getElementById('sos-trigger');
+        if (sosTrigger) {
+          sosTrigger.click();
+        }
+      }
+    };
+  }
+
+  function activateVoice() {
+    isActive = true;
+    toggleBtn.classList.add('active');
+    if (recognition) {
+      try {
+        recognition.start();
+        logTelemetryEntry("Safety", "Voice Guardian Activated", "--", "Listen");
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      voiceStatus.textContent = "Not Supported in Browser";
+      voiceStatus.style.color = "var(--color-crimson)";
+      logTelemetryEntry("Error", "Speech API Not Supported", "--", "Fail");
+    }
+  }
+
+  function deactivateVoice() {
+    isActive = false;
+    toggleBtn.classList.remove('active');
+    if (recognition) {
+      try {
+        recognition.stop();
+        logTelemetryEntry("Safety", "Voice Guardian Deactivated", "--", "OFF");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (!isActive) {
+      activateVoice();
+    } else {
+      deactivateVoice();
     }
   });
 }

@@ -860,6 +860,21 @@ body {
   animation: pulse-border 1.2s infinite;
 }
 
+.action-icon.voice {
+  background: linear-gradient(135deg, hsla(270, 90%, 50%, 0.30), hsla(270, 90%, 50%, 0.15));
+  border-color: hsla(270, 90%, 50%, 0.5);
+  color: hsl(270, 90%, 65%);
+  box-shadow: 0 0 12px hsla(270, 90%, 50%, 0.2);
+}
+
+.action-icon.voice.listening {
+  background: linear-gradient(135deg, hsla(140, 71%, 48%, 0.35), hsla(140, 71%, 48%, 0.15));
+  border-color: hsla(140, 71%, 48%, 0.6);
+  color: var(--color-emerald);
+  box-shadow: 0 0 16px var(--color-emerald-glow);
+  animation: pulse-border 1.2s infinite;
+}
+
 .action-info {
   flex: 1;
   min-width: 0;
