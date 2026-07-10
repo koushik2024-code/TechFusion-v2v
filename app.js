@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize Application State
   window.appState = {
     sosActive: false,
+    sosCountdownActive: false,
     sirenActive: false,
     recordingActive: false,
     telemetryStreaming: true,
@@ -82,6 +83,7 @@ function initSOS() {
 
   const triggerSOSCountdown = () => {
     if (window.appState.sosActive) return; // Prevent double trigger if already active
+    window.appState.sosCountdownActive = true;
     countdownCount = 3;
     countdownNum.textContent = countdownCount;
     countdownOverlay.classList.add('show');
@@ -114,6 +116,7 @@ function initSOS() {
   };
 
   const cancelSOS = () => {
+    window.appState.sosCountdownActive = false;
     clearInterval(countdownInterval);
     countdownOverlay.classList.remove('show');
     logTelemetryEntry("Uplink", "SOS Cancelled", "--", "--");
@@ -121,6 +124,7 @@ function initSOS() {
 
   const activateEmergency = () => {
     window.appState.sosActive = true;
+    window.appState.sosCountdownActive = false;
     countdownOverlay.classList.remove('show');
     activeOverlay.classList.add('show');
 
@@ -603,14 +607,21 @@ function initVoiceTrigger() {
       const transcript = event.results[resultIndex][0].transcript.toLowerCase();
       console.log("Voice Transcript:", transcript);
 
-      if (window.appState.sosActive) {
-        // If SOS is active, listen for "stop" or "cancel" or "deactivate" to stand down
+      if (window.appState.sosActive || window.appState.sosCountdownActive) {
+        // If SOS is active or countdown is running, listen for "stop" or "cancel" or "deactivate" to stand down
         const stopKeywords = ["stop", "cancel", "deactivate", "stand down"];
         const hasStopKeyword = stopKeywords.some(keyword => transcript.includes(keyword));
         if (hasStopKeyword) {
           logTelemetryEntry("Safety", `Voice Deactivation Command: "${transcript.trim()}"`, "--", "STANDBY");
-          if (window.deactivateEmergencyBroadcast) {
-            window.deactivateEmergencyBroadcast();
+          if (window.appState.sosCountdownActive) {
+            // Cancel the countdown!
+            const cancelBtn = document.getElementById('cancel-sos');
+            if (cancelBtn) cancelBtn.click();
+          } else {
+            // Stop the active emergency
+            if (window.deactivateEmergencyBroadcast) {
+              window.deactivateEmergencyBroadcast();
+            }
           }
           deactivateVoice(); // Deactivate Voice Guardian to stop listening permanently
         }
