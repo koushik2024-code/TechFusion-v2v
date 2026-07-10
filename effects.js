@@ -281,6 +281,151 @@
     });
   });
 
+  /* ══════════════════════════════════════════════════════════════════════════
+     6. REAL-TIME TELEMETRY CHART & AUDIO WAVE VISUALIZER
+  ══════════════════════════════════════════════════════════════════════════ */
+  
+  // Audio Wave Visualizer
+  const waveCanvas = document.getElementById('audio-wave-canvas');
+  if (waveCanvas) {
+    const waveCtx = waveCanvas.getContext('2d');
+    let angle = 0;
+    function drawAudioWave() {
+      if (!window.appState || !window.appState.recordingActive) {
+        waveCanvas.style.display = 'none';
+        requestAnimationFrame(drawAudioWave);
+        return;
+      }
+      waveCanvas.style.display = 'block';
+      waveCtx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+      waveCtx.lineWidth = 1.5;
+      
+      // Draw three shifting sine waves
+      for (let offset = 0; offset < 3; offset++) {
+        waveCtx.strokeStyle = `hsla(348, 100%, 65%, ${0.9 - offset * 0.35})`;
+        waveCtx.beginPath();
+        for (let x = 0; x < waveCanvas.width; x++) {
+          const y = waveCanvas.height / 2 + Math.sin(x * 0.12 + angle + offset) * (waveCanvas.height / 2.8);
+          if (x === 0) waveCtx.moveTo(x, y);
+          else waveCtx.lineTo(x, y);
+        }
+        waveCtx.stroke();
+      }
+      angle += 0.15;
+      requestAnimationFrame(drawAudioWave);
+    }
+    requestAnimationFrame(drawAudioWave);
+  }
+
+  // Telemetry Real-Time Glowing Line Chart
+  const chartCanvas = document.getElementById('telemetry-chart');
+  if (chartCanvas) {
+    const chartCtx = chartCanvas.getContext('2d');
+    
+    function resizeChart() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = chartCanvas.getBoundingClientRect();
+      chartCanvas.width = rect.width * dpr;
+      chartCanvas.height = rect.height * dpr;
+      chartCtx.scale(dpr, dpr);
+    }
+    
+    window.addEventListener('resize', resizeChart);
+    setTimeout(resizeChart, 200);
+
+    const dataPoints = [];
+    const maxPoints = 25;
+    let baseSpeed = 45;
+
+    function drawChart() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = chartCanvas.width / dpr;
+      const h = chartCanvas.height / dpr;
+      
+      if (w <= 0 || h <= 0) {
+        setTimeout(drawChart, 150);
+        return;
+      }
+      
+      chartCtx.clearRect(0, 0, w, h);
+      
+      // Get speed data, or fallback to random walking latency data
+      let currentVal = 0;
+      if (window.appState && window.appState.speed > 0) {
+        currentVal = window.appState.speed;
+      } else {
+        baseSpeed += (Math.random() - 0.5) * 5;
+        baseSpeed = Math.max(15, Math.min(75, baseSpeed));
+        currentVal = baseSpeed;
+      }
+      
+      dataPoints.push(currentVal);
+      if (dataPoints.length > maxPoints) {
+        dataPoints.shift();
+      }
+      
+      // Draw Grid
+      chartCtx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      chartCtx.lineWidth = 1;
+      for (let i = 0; i < maxPoints; i++) {
+        const x = (w / (maxPoints - 1)) * i;
+        chartCtx.beginPath();
+        chartCtx.moveTo(x, 0);
+        chartCtx.lineTo(x, h);
+        chartCtx.stroke();
+      }
+      for (let i = 1; i < 4; i++) {
+        const y = (h / 4) * i;
+        chartCtx.beginPath();
+        chartCtx.moveTo(0, y);
+        chartCtx.lineTo(w, y);
+        chartCtx.stroke();
+      }
+
+      if (dataPoints.length > 1) {
+        // Draw Fill Gradient
+        chartCtx.beginPath();
+        chartCtx.moveTo(0, h);
+        for (let i = 0; i < dataPoints.length; i++) {
+          const x = (w / (maxPoints - 1)) * i;
+          const valPct = (dataPoints[i] - 10) / 70;
+          const y = h - 6 - valPct * (h - 12);
+          chartCtx.lineTo(x, y);
+        }
+        chartCtx.lineTo((w / (maxPoints - 1)) * (dataPoints.length - 1), h);
+        chartCtx.closePath();
+        
+        const gradient = chartCtx.createLinearGradient(0, 0, 0, h);
+        gradient.addColorStop(0, 'rgba(0, 182, 212, 0.25)');
+        gradient.addColorStop(1, 'rgba(0, 182, 212, 0.0)');
+        chartCtx.fillStyle = gradient;
+        chartCtx.fill();
+
+        // Draw Glowing Line
+        chartCtx.strokeStyle = 'hsl(190, 90%, 50%)';
+        chartCtx.lineWidth = 2.2;
+        chartCtx.shadowBlur = 8;
+        chartCtx.shadowColor = 'rgba(6, 182, 212, 0.6)';
+        
+        chartCtx.beginPath();
+        for (let i = 0; i < dataPoints.length; i++) {
+          const x = (w / (maxPoints - 1)) * i;
+          const valPct = (dataPoints[i] - 10) / 70;
+          const y = h - 6 - valPct * (h - 12);
+          if (i === 0) chartCtx.moveTo(x, y);
+          else chartCtx.lineTo(x, y);
+        }
+        chartCtx.stroke();
+        
+        // Reset Shadow for other drawings
+        chartCtx.shadowBlur = 0;
+      }
+      
+      setTimeout(drawChart, 150);
+    }
+    setTimeout(drawChart, 300);
+  }
+
   /* INIT */
   // Tilt removed per user request.
 
