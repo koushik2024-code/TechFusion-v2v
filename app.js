@@ -612,6 +612,7 @@ function initVoiceTrigger() {
           if (window.deactivateEmergencyBroadcast) {
             window.deactivateEmergencyBroadcast();
           }
+          deactivateVoice(); // Deactivate Voice Guardian to stop listening permanently
         }
       } else {
         // If SOS is not active, listen for trigger keywords to activate
